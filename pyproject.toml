@@ -20,8 +20,8 @@ django-cleanup = "^9.0.0"
 pydantic-settings = "^2.6.1"
 pillow = "^11.0.0"
 pydantic = {extras = ["email"], version = "^2.10.3"}
-drf-standardized-errors = {extras = ["drf-spectacular"], version = "^0.14.1"}
 drf-spectacular = "^0.28.0"
+drf-standardized-errors = {extras = ["openapi"], version = "^0.14.1"}
 
 
 [tool.poetry.group.dev.dependencies]
