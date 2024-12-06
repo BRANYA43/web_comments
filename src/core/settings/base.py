@@ -12,6 +12,7 @@ ALLOWED_HOSTS = envs.app.allowed_hosts
 
 
 INSTALLED_APPS = [
+    'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -21,6 +22,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'drf_spectacular',
     'drf_standardized_errors',
+    'channels',
     'django_cleanup.apps.CleanupConfig',  # must be after all apps that have models
 ]
 
@@ -40,6 +42,8 @@ ROOT_URLCONF = 'core.urls'
 
 
 WSGI_APPLICATION = 'core.wsgi.application'
+
+ASGI_APPLICATION = 'core.asgi.application'
 
 
 AUTH_PASSWORD_VALIDATORS = [
