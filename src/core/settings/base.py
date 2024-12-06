@@ -21,6 +21,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'drf_spectacular',
     'drf_standardized_errors',
+    'django_cleanup.apps.CleanupConfig',  # must be after all apps that have models
 ]
 
 
