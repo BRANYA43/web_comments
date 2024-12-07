@@ -24,6 +24,7 @@ INSTALLED_APPS = [
     'drf_standardized_errors',
     'channels',
     'comments',
+    'accounts',
     'django_cleanup.apps.CleanupConfig',  # must be after all apps that have models
 ]
 
