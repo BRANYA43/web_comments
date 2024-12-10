@@ -1,9 +1,11 @@
 # postgres
+dbname ?= web_comments
 create-db:
 	psql -U postgres -c "CREATE DATABASE web_comments;"
 
 recreate-schema:
-	psql -U postgres -d $(dbname) -c 'DROP SCHEMA public CASCADE; CREATE SCHEMA public;'
+	psql -U postgres -d $(dbname) -c 'DROP SCHEMA public CASCADE;'
+	psql -U postgres -d $(dbname) -c 'CREATE SCHEMA public;'
 
 
 # django
