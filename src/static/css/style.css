@@ -5,3 +5,8 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+.icon-size-20 {
+    width: 20px;
+    height: 20px;
+}
