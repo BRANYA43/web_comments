@@ -27,7 +27,7 @@
 
         {% else %}
           <li class="nav-item">
-            <button id="nav_sign_in" class="nav-link">
+            <button id="nav_login" class="nav-link" data-bs-toggle="modal" data-bs-target="#login_modal">
               Sign In
             </button>
           </li>
@@ -42,3 +42,5 @@
     </div>
   </div>
 </nav>
+
+{% include 'components/modals/login.html' %}
