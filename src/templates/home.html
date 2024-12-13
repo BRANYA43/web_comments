@@ -3,5 +3,10 @@
   {% include 'components/navbar.html' %}
 {% endblock header_content %}
 {% block main_content %}
-  {% include 'components/table.html' %}
+  <div>
+    {% include 'components/table.html' %}
+  </div>
+  <div class="d-flex justify-content-center">
+    {% include 'components/paginator.html' %}
+  </div>
 {% endblock main_content %}
