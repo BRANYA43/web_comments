@@ -10,3 +10,7 @@
     width: 20px;
     height: 20px;
 }
+
+.focus-outline-none:focus {
+    box-shadow: none;
+}
