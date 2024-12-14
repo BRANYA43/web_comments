@@ -1,39 +1,29 @@
-  <div class="modal fade" id="register_modal" tabindex="-1" aria-labelledby="register_modal_label" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h1 class="modal-title fs-5" id="register_modal_label">Modal title</h1>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <form id="register_form" class="needs-validation" action="#" method="post" novalidate>
-          {% csrf_token %}
-          <div class="modal-body">
-            <div class="mb-3">
-              <label for="email_field" class="form-label">Email</label>
-              <input id="email_field" class="form-control" name="email" type="email" required>
-              <div class="invalid-feedback"></div>
-            </div>
-            <div class="mb-3">
-              <label for="username_field" class="form-label">Username</label>
-              <input id="username_field" class="form-control" name="username" type="text" required>
-              <div class="invalid-feedback"></div>
-            </div>
-            <div class="mb-3">
-              <label for="password_field" class="form-label">Password</label>
-              <input id="password_field" class="form-control" name="password" type="password" required>
-              <div class="invalid-feedback"></div>
-            </div>
-            <div class="mb-3">
-              <label for="confirming_password_field" class="form-label">Confirming Password</label>
-              <input id="confirming_password_field" class="form-control" name="confirming_password" type="password" required>
-              <div class="invalid-feedback"></div>
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button id="register_form_reset" type="reset" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            <button id="register_form_submit" type="submit" class="btn btn-primary">Sign Up</button>
-          </div>
-        </form>
-      </div>
-    </div>
+{% extends 'components/modals/base_modal_form.html' %}
+{% block modal_id %}register{% endblock modal_id %}
+{% block modal_title %}Registration{% endblock modal_title %}
+{% block form_id %}register{% endblock form_id %}
+{% block form_action %}#{% endblock form_action %}
+{% block form_method %}post{% endblock form_method %}
+{% block submit_name %}Sign Up{% endblock submit_name %}
+{% block form_fields %}
+  <div class="mb-3">
+    <label for="email_field" class="form-label">Email</label>
+    <input id="email_field" class="form-control" name="email" type="email" required>
+    <div class="invalid-feedback"></div>
   </div>
+  <div class="mb-3">
+    <label for="username_field" class="form-label">Username</label>
+    <input id="username_field" class="form-control" name="username" type="text" required>
+    <div class="invalid-feedback"></div>
+  </div>
+  <div class="mb-3">
+    <label for="password_field" class="form-label">Password</label>
+    <input id="password_field" class="form-control" name="password" type="password" required>
+    <div class="invalid-feedback"></div>
+  </div>
+  <div class="mb-3">
+    <label for="confirming_password_field" class="form-label">Confirming Password</label>
+    <input id="confirming_password_field" class="form-control" name="confirming_password" type="password" required>
+    <div class="invalid-feedback"></div>
+  </div>
+{% endblock form_fields %}
