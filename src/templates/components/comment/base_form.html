@@ -1,0 +1,28 @@
+<form
+    id="{% block form_id %}id{% endblock form_id %}_form"
+    class="needs-validation"
+    action="{% block form_action %}#{% endblock form_action %}"
+    method="{% block form_method %}post{% endblock form_method %}"
+    novalidate>
+  <div class="mb-3 border border rounded">
+    <div id="tool_panel" class="d-flex flex-row my-2">
+      <button type="button" class="btn btn-dark" name="bold"><i class="icon-size-20" data-feather="bold"></i></button>
+      <button type="button" class="btn btn-dark" name="italic"><i class="icon-size-20" data-feather="italic"></i></button>
+      <button type="button" class="btn btn-dark" name="underline"><i class="icon-size-20" data-feather="underline"></i></button>
+      <button type="button" class="btn btn-dark" name="link"><i class="icon-size-20" data-feather="link"></i></button>
+      <button type="button" class="btn btn-dark" name="code"><i class="icon-size-20" data-feather="code"></i></button>
+    </div>
+    <textarea
+        id="text_field"
+        class="form-control focus-outline-none border border-0"
+        name="text"
+        rows="6"
+        placeholder="{% block text_placeholder %}TEXT{% endblock text_placeholder %}"
+        required></textarea>
+    <div class="invalid-feedback"></div>
+  </div>
+  <div class="d-flex justify-content-end">
+    <button class="btn btn-secondary" type="button">Cancel</button>
+    <button class="btn btn-primary ms-2" type="submit">{% block submit_name %}Submit{% endblock submit_name %}</button>
+  </div>
+</form>
