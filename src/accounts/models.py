@@ -2,6 +2,8 @@ from django.contrib.auth.base_user import AbstractBaseUser
 from django.contrib.auth.models import PermissionsMixin
 from django.db import models  # NOQA
 
+from accounts.managers import UserManager
+
 
 class User(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(
@@ -17,6 +19,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     USERNAME_FIELD = 'email'
     EMAIL_FIELD = 'email'
     REQUIRED_FIELDS = ['username']
+
+    objects = UserManager()
 
     class Meta:
         get_latest_by = 'joined'
