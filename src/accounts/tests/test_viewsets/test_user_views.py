@@ -8,6 +8,22 @@ GeneralUser = get_user_model()
 pytestmark = pytest.mark.django_db(transaction=True)
 
 
+class TestLogoutView:
+    url = reverse('user-logout')
+
+    def test_view_logs_user_out(self, api_client, test_user):
+        api_client.force_login(test_user)
+
+        response = api_client.get(self.url)
+
+        assert response.status_code == status.HTTP_200_OK
+
+    def test_view_doesnt_log_user_out_if_user_isnt_authenticated(self, api_client, test_user):
+        response = api_client.get(self.url)
+
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+
+
 class TestLoginView:
     url = reverse('user-login')
 
@@ -56,7 +72,7 @@ class TestLoginView:
 
         response = api_client.post(self.url, data=test_data, format='json')
 
-        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+        assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
 class TestRegisterView:

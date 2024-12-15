@@ -1,10 +1,10 @@
 from typing import Type
 
-from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model, logout
 from django.shortcuts import render  # NOQA
 from rest_framework import status
 from rest_framework.decorators import action
-from rest_framework.permissions import AllowAny, BasePermission
+from rest_framework.permissions import AllowAny, IsAuthenticated, BasePermission
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.serializers import Serializer
@@ -24,6 +24,7 @@ class UserViewSet(GenericViewSet):
     }
     permission_classes: dict[str, tuple[Type[BasePermission]]] = {
         'default': (AllowAny,),
+        'logout': (IsAuthenticated,),
     }
 
     def get_serializer_class(self) -> Type[Serializer] | None:
@@ -39,6 +40,11 @@ class UserViewSet(GenericViewSet):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(methods=['get'], detail=False)
+    def logout(self, request: Request, *args, **kwargs):
+        logout(request)
+        return Response(status.HTTP_200_OK)
 
     @action(methods=['post'], detail=False)
     def register(self, request: Request, *args, **kwargs):
