@@ -1,12 +1,92 @@
 from typing import Any
+from unittest.mock import MagicMock
 
 import pytest
+from pytest_lazy_fixtures import lf
 from django.contrib.auth import get_user_model
-from rest_framework.exceptions import ValidationError
+from django.contrib.auth.models import AnonymousUser
 
-from accounts.serializers import RegisterSerializer
+from rest_framework.exceptions import ValidationError, AuthenticationFailed
+from django.test import RequestFactory
+
+from accounts.serializers import RegisterSerializer, LoginSerializer
 
 GeneralUser = get_user_model()
+
+
+@pytest.mark.django_db(transaction=True)
+class TestLoginSerializer:
+    serializer_class = LoginSerializer
+
+    @pytest.fixture()
+    def test_data(self, test_email, test_password):
+        return dict(
+            email=test_email,
+            password=test_password,
+        )
+
+    @pytest.fixture()
+    def test_request(self):
+        factory = RequestFactory()
+        request_ = factory.get('/404/')
+        request_.user = AnonymousUser()
+        request_.session = MagicMock()
+        return request_
+
+    def test_serializer_logs_user_in(self, test_data, test_user, test_request):
+        assert test_request.user.is_authenticated is False
+
+        serializer = self.serializer_class(data=test_data, context={'request': test_request})
+        serializer.is_valid(raise_exception=True)  # not raise
+
+        assert test_request.user.is_authenticated is True
+        assert test_request.user == test_user
+
+    @pytest.mark.parametrize(
+        'data',
+        [
+            {},
+            {'email': '', 'password': ''},
+            {'email': lf('test_email'), 'password': ''},
+            {'email': '', 'password': lf('test_password')},
+        ],
+    )
+    def test_serializer_doesnt_log_user_in_if_credentials_are_empty(self, data, test_user, test_request):
+        assert test_request.user.is_authenticated is False
+
+        serializer = self.serializer_class(data=data, context={'request': test_request})
+
+        pytest.raises(ValidationError, serializer.is_valid, raise_exception=True)
+        assert test_request.user.is_authenticated is False
+
+    @pytest.mark.parametrize(
+        'data',
+        [
+            {'email': 'invalidEmail@test.com', 'password': 'invalidPassword1234'},
+            {'email': lf('test_email'), 'password': 'invalidPassword1234'},
+            {'email': 'invalidEmail@test.com', 'password': lf('test_password')},
+        ],
+    )
+    def test_serializer_doesnt_log_user_in_if_no_user_doesnt_exist_with_such_credentials(
+        self, data, test_user, test_request
+    ):
+        assert test_request.user.is_authenticated is False
+
+        serializer = self.serializer_class(data=data, context={'request': test_request})
+
+        pytest.raises(AuthenticationFailed, serializer.is_valid, raise_exception=True)
+        assert test_request.user.is_authenticated is False
+
+    def test_serializer_doesnt_log_user_in_if_user_isnt_active(self, test_data, test_user, test_request):
+        test_user.is_active = False
+        test_user.save()
+
+        assert test_request.user.is_authenticated is False
+
+        serializer = self.serializer_class(data=test_data, context={'request': test_request})
+
+        pytest.raises(AuthenticationFailed, serializer.is_valid, raise_exception=True)
+        assert test_request.user.is_authenticated is False
 
 
 class TestRegistrationSerializer:

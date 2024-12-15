@@ -1,7 +1,38 @@
-from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model, authenticate, login
 from rest_framework import serializers  # NOQA
+from rest_framework.exceptions import NotAuthenticated, AuthenticationFailed
 
 GeneralUser = get_user_model()
+
+
+class LoginSerializer(serializers.Serializer):
+    email = serializers.EmailField(required=True)
+    password = serializers.CharField(write_only=True, required=True, trim_whitespace=True)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._request = kwargs['context']['request']
+        self._cached_user: GeneralUser | None = None
+
+    @property
+    def cached_user(self):
+        return self._cached_user
+
+    def validate(self, attrs):
+        email = attrs.get('email')
+        password = attrs.get('password')
+
+        if not email and not password:
+            raise NotAuthenticated
+
+        self._cached_user = authenticate(self._request, username=email, password=password)
+
+        if not self._cached_user:
+            raise AuthenticationFailed
+
+        login(self._request, self._cached_user)
+
+        return {}
 
 
 class RegisterSerializer(serializers.ModelSerializer):
