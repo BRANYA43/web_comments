@@ -12,7 +12,7 @@ class LoginSerializer(serializers.Serializer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._request = kwargs['context']['request']
-        self._cached_user: GeneralUser | None = None
+        self._cached_user = None
 
     @property
     def cached_user(self):
