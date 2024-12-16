@@ -32,7 +32,7 @@ class TestFileUploader:
         expected_path = Path(test_dir, expected_filename)
 
         uploader = self.uploader_class(test_dir)
-        path = uploader(test_filename, test_instance)
+        path = uploader(test_instance, test_filename)
 
         assert path == expected_path
 
@@ -47,6 +47,6 @@ class TestFileUploader:
             assert old_existed_file.exists() is True
 
             uploader = self.uploader_class(test_dir)
-            uploader(test_filename, test_instance)
+            uploader(test_instance, test_filename)
 
             assert old_existed_file.exists() is False

@@ -10,7 +10,7 @@ class FileUploader:
         self._dir = Path(dir)
         self._media_root = settings.MEDIA_ROOT
 
-    def __call__(self, filename: str, instance, *args, **kwargs):
+    def __call__(self, instance, filename: str, *args, **kwargs):
         new_filename = self._get_new_filename(filename, instance)
         path = self._dir / new_filename
         full_path = self._media_root / path
