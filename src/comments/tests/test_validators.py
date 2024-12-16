@@ -38,5 +38,5 @@ class TestFileSizeValidator:
 
     @pytest.mark.parametrize('invalid_size', ['', None, object, 'a'])
     def test_validator_raises_error_for_invalid_max_size(self, invalid_size):
-        with pytest.raises(ValueError, match='Unit must be one of next values:'):
+        with pytest.raises((TypeError, ValueError)):
             self.validator_class(invalid_size, 'b')

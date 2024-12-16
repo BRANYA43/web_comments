@@ -11,7 +11,7 @@ class FileSizeValidator:
         'kb': 1024,
     }
 
-    default_message_error = {'file_too_large': 'File size must be less or equal {max_size}{unit}.'}
+    default_message_errors = {'file_too_large': 'File size must be less or equal {max_size}{unit}.'}
 
     def __init__(self, max_size: int, unit: Literal['b', 'kb']):
         self._max_size = int(max_size)
@@ -24,6 +24,6 @@ class FileSizeValidator:
     def __call__(self, value, *args, **kwargs):
         if value.size > self._max_size_in_bytes:
             raise ValidationError(
-                self.default_message_error['file_too_large'].format(max_size=self._max_size, unit=self._unit),
+                self.default_message_errors['file_too_large'].format(max_size=self._max_size, unit=self._unit),
                 'file_too_large',
             )
