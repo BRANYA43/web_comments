@@ -4,6 +4,7 @@ from uuid import uuid4
 
 import pytest
 from django.test import override_settings
+from django.utils.timezone import now
 
 from comments.services import FileUploader
 
@@ -26,6 +27,11 @@ class TestFileUploader:
     def create_file(self, path: Path):
         path.parent.mkdir(parents=True)
         path.touch()
+
+    def test_uploader_formats_path_if_it_has_datetime_value_to_format(self):
+        path = 'dir/%Y/%m/%d'
+        uploader = self.uploader_class(path)
+        assert str(uploader._dir) == now().strftime(path)
 
     def test_uploader_returns_correct_path(self, test_dir, test_instance, test_filename):
         expected_filename = f'{test_instance.uuid}.{test_filename.split('.')[-1]}'
