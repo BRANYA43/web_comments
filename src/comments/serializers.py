@@ -15,3 +15,9 @@ class CommentRetrieveSerializer(serializers.ModelSerializer):
         model = Comment
         fields = ('uuid', 'user', 'target', 'text', 'image', 'file', 'updated', 'created')
         read_only_fields = fields
+
+
+class CommentCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Comment
+        fields = ('user', 'target', 'text', 'image', 'file')
