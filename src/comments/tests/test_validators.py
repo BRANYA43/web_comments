@@ -3,7 +3,22 @@ from unittest.mock import MagicMock
 import pytest
 from django.core.exceptions import ValidationError
 
-from comments.validators import FileSizeValidator
+from comments.validators import FileSizeValidator, ImageSizeValidator
+
+
+class TestImageSizeValidator:
+    validator_class = ImageSizeValidator
+
+    @pytest.mark.parametrize('width, height', [(25, 100), (50, 150), (100, 200)])
+    def test_validator_doesnt_raise_error_to_valid_width_or_height(self, width, height):
+        validator = self.validator_class(100, 200)
+        validator(MagicMock(width=width, height=height))  # not raise
+
+    @pytest.mark.parametrize('width, height', [(100, 200), (200, 150), (200, 200)])
+    def test_validator_raises_error_to_invalid_width_or_height(self, width, height):
+        validator = self.validator_class(100, 150)
+        with pytest.raises(ValidationError, match='Image must have 100x150 size.'):
+            validator(MagicMock(width=width, height=height))
 
 
 class TestFileSizeValidator:
