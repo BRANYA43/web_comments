@@ -31,6 +31,8 @@ pre-commit = "^4.0.1"
 pytest = "^8.3.4"
 selenium = "^4.27.1"
 pytest-lazy-fixtures = "^1.1.1"
+faker = "^33.1.0"
+pytest-factoryboy = "^2.7.0"
 
 [build-system]
 requires = ["poetry-core"]
