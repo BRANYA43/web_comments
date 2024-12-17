@@ -5,7 +5,7 @@ import pytest
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import override_settings
 
-from accounts.tests.conftest import *  # NOQA
+from tests.accounts.conftest import test_user, test_email, test_password, test_username  # NOQA
 
 
 @pytest.fixture()
