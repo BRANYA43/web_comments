@@ -4,8 +4,6 @@ import PIL.Image
 import pytest
 from django.core.files.uploadedfile import SimpleUploadedFile
 
-from tests.accounts.conftest import test_user, test_email, test_password, test_username  # NOQA
-
 
 def get_uploaded_file(name='test_file.txt', size=1, content=b'a', content_type='text/plain') -> SimpleUploadedFile:
     content = content * size
