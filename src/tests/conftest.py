@@ -5,7 +5,6 @@ from django.test import override_settings
 from pytest_factoryboy import register
 from rest_framework.test import APIClient
 
-from comments.models import Comment
 
 GeneralUser = get_user_model()
 
@@ -21,15 +20,6 @@ class UserFactory(factory.django.DjangoModelFactory):
 
     class Meta:
         model = GeneralUser
-
-
-@register
-class CommentFactory(factory.django.DjangoModelFactory):
-    user = factory.SubFactory(UserFactory)
-    text = factory.Faker('text')
-
-    class Meta:
-        model = Comment
 
 
 ########################################################################################################################

@@ -1,10 +1,30 @@
 from io import BytesIO
 
 import PIL.Image
+import factory
 import pytest
 from django.core.files.uploadedfile import SimpleUploadedFile
+from pytest_factoryboy import register
+
+from comments.models import Comment
+from tests.conftest import UserFactory
 
 
+########################################################################################################################
+# Factories
+########################################################################################################################
+@register
+class CommentFactory(factory.django.DjangoModelFactory):
+    user = factory.SubFactory(UserFactory)
+    text = factory.Faker('text')
+
+    class Meta:
+        model = Comment
+
+
+########################################################################################################################
+# Fixtures
+########################################################################################################################
 def get_uploaded_file(name='test_file.txt', size=1, content=b'a', content_type='text/plain') -> SimpleUploadedFile:
     content = content * size
     return SimpleUploadedFile(name=name, content=content, content_type=content_type)
