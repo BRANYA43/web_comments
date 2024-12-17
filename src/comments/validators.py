@@ -1,6 +1,8 @@
 from typing import Literal
 
+import PIL.Image
 from django.core.exceptions import ValidationError
+from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.utils.deconstruct import deconstructible
 
 
@@ -13,6 +15,8 @@ class ImageSizeValidator:
         self._height = int(height)
 
     def __call__(self, value, *args, **kwargs):
+        if isinstance(value, InMemoryUploadedFile):
+            value = PIL.Image.open(value.file)
         if value.width > self._width or value.height > self._height:
             raise ValidationError(
                 self.default_message_errors['image_too_large'].format(width=self._width, height=self._height),
