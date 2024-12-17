@@ -14,6 +14,8 @@ GeneralUser = get_user_model()
 # Factories
 ########################################################################################################################
 @register
+@register(_name='owner')
+@register(_name='not_owner')
 class UserFactory(factory.django.DjangoModelFactory):
     email = factory.Faker('email')
     username = factory.Faker('user_name')
