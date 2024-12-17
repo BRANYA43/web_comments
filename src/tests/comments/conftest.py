@@ -3,16 +3,8 @@ from io import BytesIO
 import PIL.Image
 import pytest
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.test import override_settings
 
 from tests.accounts.conftest import test_user, test_email, test_password, test_username  # NOQA
-
-
-@pytest.fixture()
-def test_media_root(tmp_path):
-    path = tmp_path / 'test_media'
-    with override_settings(MEDIA_ROOT=path):
-        yield path
 
 
 def get_uploaded_file(name='test_file.txt', size=1, content=b'a', content_type='text/plain') -> SimpleUploadedFile:
