@@ -3,8 +3,9 @@ import pytest
 from django.contrib.auth import get_user_model
 from django.test import override_settings
 from pytest_factoryboy import register
+from rest_framework.request import Request
 from rest_framework.test import APIClient
-
+from rest_framework.test import APIRequestFactory
 
 GeneralUser = get_user_model()
 
@@ -35,3 +36,8 @@ def test_media_root(tmp_path):
     path = tmp_path / 'test_media'
     with override_settings(MEDIA_ROOT=path):
         yield path
+
+
+@pytest.fixture()
+def test_request() -> Request:
+    return APIRequestFactory().get('/')
