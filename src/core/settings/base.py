@@ -22,6 +22,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'drf_spectacular',
     'drf_standardized_errors',
+    'django_filters',
     'channels',
     'comments',
     'accounts',
