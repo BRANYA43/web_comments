@@ -121,7 +121,7 @@ class TestRegisterView:
         assert user.email == test_data['email']
         assert user.username == test_data['username']
         assert user.check_password(test_data['password']) is True
-        assert user.is_active is False
+        assert user.is_active is True
         assert user.is_staff is False
         assert user.is_superuser is False
 

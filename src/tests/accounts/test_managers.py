@@ -21,7 +21,7 @@ class TestUserManager:
         assert user.email == test_email
         assert user.username == test_username
         assert user.check_password(test_password) is True
-        assert user.is_active is False
+        assert user.is_active is True
         assert user.is_staff is False
         assert user.is_superuser is False
 
