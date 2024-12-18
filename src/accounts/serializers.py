@@ -5,6 +5,13 @@ from rest_framework.exceptions import NotAuthenticated, AuthenticationFailed
 GeneralUser = get_user_model()
 
 
+class UserRetrieveSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = GeneralUser
+        fields = ('email', 'username')
+        read_only_fields = fields
+
+
 class LoginSerializer(serializers.Serializer):
     email = serializers.EmailField(required=True)
     password = serializers.CharField(write_only=True, required=True, trim_whitespace=True)
