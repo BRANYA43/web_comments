@@ -40,7 +40,6 @@ def explicit_wait(extra_errors: Iterable[Type[Exception]] = (), timeout=3):
 
 @explicit_wait(
     [
-        ElementClickInterceptedException,
         ElementNotVisibleException,
         ElementNotInteractableException,
         ElementNotSelectableException,
@@ -60,6 +59,11 @@ def wait_for_element(
     return element
 
 
+@explicit_wait([ElementClickInterceptedException])
+def wait_to_click(fn: Callable[..., WebElement]):
+    wait_for_element(fn).click()
+
+
 def call_delay(fn: Callable[..., T], delay=0.25) -> T:
     sleep(delay)
     return fn()
@@ -69,3 +73,9 @@ def submit_form(form: WebElement, data: dict[str, Any]):
     for field, value in data.items():
         form.find_element(value=field).send_keys(value)
     call_delay(form.submit)
+
+
+def login_user(webdriver: WebDriver, email: str, password: str):
+    wait_to_click(lambda: webdriver.find_element(value='nav_login'))
+    form = wait_for_element(lambda: webdriver.find_element(value='login_form'))
+    submit_form(form, {'email_field': email, 'password_field': password})

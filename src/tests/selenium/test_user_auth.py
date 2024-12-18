@@ -1,7 +1,20 @@
 import pytest
 from selenium.webdriver.firefox.webdriver import WebDriver
 
-from tests.selenium.tools import submit_form, wait_for_element
+from tests.selenium.tools import submit_form, wait_for_element, login_user
+
+
+@pytest.mark.django_db(transaction=True)
+class TestUserLogout:
+    def test_user_logs_out(self, selenium: WebDriver, live_server, rick):
+        # user enters to the site
+        selenium.get(live_server.url)
+
+        # user opens modal of login form and inputs his credentials in the form and submits it
+        login_user(selenium, rick.email, rick.raw_password)
+
+        # user sees his email into the navbar
+        wait_for_element(lambda: selenium.find_element(value='nav_login'))
 
 
 @pytest.mark.django_db(transaction=True)

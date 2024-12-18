@@ -25,6 +25,20 @@ function set_invalid_feedback(xhr, form) {
 }
 
 $(document).ready(function() {
+    $('#nav_logout').click(function (e) {
+        e.preventDefault();
+
+        var link = $(this)
+
+        $.ajax({
+            type: 'get',
+            url: link.attr('href'),
+            success: function (response) {
+                location.reload();
+            },
+        });
+    });
+
     $('#login_form').submit(function(e) {
         e.preventDefault();
 
