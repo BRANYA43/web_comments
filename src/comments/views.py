@@ -17,7 +17,7 @@ from comments.serializers import (
 
 
 class CommentViewSet(ModelViewSet):
-    queryset = Comment.objects.all()
+    queryset = Comment.objects.select_related('user').all()
     serializer_classes: dict[str, Type[Serializer]] = {
         'list': CommentListSerializer,
         'retrieve': CommentRetrieveSerializer,
