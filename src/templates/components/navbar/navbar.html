@@ -3,8 +3,7 @@
     <a class="navbar-brand" href="#">Web</a>
     <div class="collapse navbar-collapse d-flex justify-content-between" id="navbarSupportedContent">
       <div></div>
-
-      {% if user.authenticated %}
+      {% if user.is_authenticated %}
         {% include 'components/navbar/account_nav_links.html' %}
       {% else %}
         {% include 'components/navbar/auth_nav_links.html' %}
