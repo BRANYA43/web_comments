@@ -57,7 +57,8 @@ class TestLoginView:
     def test_view_logs_user_in(self, api_client, test_data, test_user):
         response = api_client.post(self.url, data=test_data, format='json')
 
-        assert response.status_code == status.HTTP_204_NO_CONTENT
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data == {'email': test_user.email, 'username': test_user.username}
 
     @pytest.mark.parametrize(
         'data',

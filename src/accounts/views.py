@@ -41,7 +41,7 @@ class UserViewSet(GenericViewSet):
     def login(self, request: Request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response(data=serializer.validated_data, status=status.HTTP_200_OK)
 
     @action(methods=['get'], detail=False)
     def logout(self, request: Request, *args, **kwargs):

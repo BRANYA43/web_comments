@@ -39,7 +39,7 @@ class LoginSerializer(serializers.Serializer):
 
         login(self._request, self._cached_user)
 
-        return {}
+        return {'email': self._cached_user.email, 'username': self._cached_user.username}
 
 
 class RegisterSerializer(serializers.ModelSerializer):
