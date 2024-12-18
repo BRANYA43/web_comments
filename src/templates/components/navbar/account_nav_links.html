@@ -1,0 +1,20 @@
+<ul id="account_nav_links" class="navbar-nav mb-2 mb-lg-0">
+  <li class="nav-item">
+    <a id="nav_create_post" class="nav-link" href="#">
+      Create
+    </a>
+  </li>
+
+  <li class="nav-item dropdown">
+    <button id="nav_user_menu" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+      {{ user.email }}
+    </button>
+    <ul class="dropdown-menu">
+      <li>
+        <a id="nav_sign_out" class="dropdown-item" href="#">
+          Sign Out
+        </a>
+      </li>
+    </ul>
+  </li>
+</ul>
