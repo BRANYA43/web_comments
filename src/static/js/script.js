@@ -25,6 +25,25 @@ function set_invalid_feedback(xhr, form) {
 }
 
 $(document).ready(function() {
+    $('#register_form').submit(function (e) {
+        e.preventDefault();
+
+        var form = $(this);
+        clean_validated_form(form);
+
+        $.ajax({
+            type: form.attr('method'),
+            url: form.attr('action'),
+            data: form.serialize(),
+            success: function (response) {
+                form.find('[type="reset"]').click();
+            },
+            error: function(xhr, status, error) {
+                set_invalid_feedback(xhr, form);
+            }
+        });
+    });
+
     $('#nav_logout').click(function (e) {
         e.preventDefault();
 

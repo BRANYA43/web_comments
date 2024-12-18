@@ -1,6 +1,9 @@
 from functools import wraps
 from time import time, sleep
 from typing import Callable, TypeVar, Iterable, Type, Any
+
+from django.core.exceptions import ObjectDoesNotExist
+from django.db.models import Model
 from selenium.common import (
     ElementClickInterceptedException,
     ElementNotVisibleException,
@@ -15,6 +18,7 @@ from selenium.webdriver.remote.webelement import WebElement
 
 WebObj = WebElement | WebDriver
 T = TypeVar('T')
+TModel = TypeVar('TModel', bound=Model)
 
 
 def explicit_wait(extra_errors: Iterable[Type[Exception]] = (), timeout=3):
@@ -62,6 +66,11 @@ def wait_for_element(
 @explicit_wait([ElementClickInterceptedException])
 def wait_to_click(fn: Callable[..., WebElement]):
     wait_for_element(fn).click()
+
+
+@explicit_wait([ObjectDoesNotExist])
+def wait_to_get_model_instance(model: Type[TModel], **kwargs) -> TModel:
+    return model.objects.get(**kwargs)
 
 
 def call_delay(fn: Callable[..., T], delay=0.25) -> T:

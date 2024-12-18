@@ -2,7 +2,7 @@
 {% block modal_id %}register{% endblock modal_id %}
 {% block modal_title %}Registration{% endblock modal_title %}
 {% block form_id %}register{% endblock form_id %}
-{% block form_action %}#{% endblock form_action %}
+{% block form_action %}{% url 'user-register' %}{% endblock form_action %}
 {% block form_method %}post{% endblock form_method %}
 {% block submit_name %}Sign Up{% endblock submit_name %}
 {% block form_fields %}
