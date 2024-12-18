@@ -11,7 +11,7 @@ from rest_framework.serializers import Serializer
 
 from rest_framework.viewsets import GenericViewSet
 
-from accounts.serializers import LoginSerializer, RegisterSerializer
+from accounts.serializers import LoginSerializer, RegisterSerializer, UserRetrieveSerializer
 
 User = get_user_model()
 
@@ -21,10 +21,12 @@ class UserViewSet(GenericViewSet):
     serializer_classes: dict[str, Type[Serializer]] = {
         'login': LoginSerializer,
         'register': RegisterSerializer,
+        'retrieve_me': UserRetrieveSerializer,
     }
     permission_classes: dict[str, tuple[Type[BasePermission]]] = {
         'default': (AllowAny,),
         'logout': (IsAuthenticated,),
+        'retrieve_me': (IsAuthenticated,),
     }
 
     def get_serializer_class(self) -> Type[Serializer] | None:
@@ -52,3 +54,8 @@ class UserViewSet(GenericViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(status=status.HTTP_201_CREATED)
+
+    @action(methods=['get'], detail=False)
+    def retrieve_me(self, request: Request, *args, **kwargs):
+        serializer = self.get_serializer(instance=request.user)
+        return Response(data=serializer.data, status=status.HTTP_200_OK)

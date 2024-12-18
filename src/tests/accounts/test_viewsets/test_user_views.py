@@ -4,8 +4,28 @@ from django.contrib.auth import get_user_model
 from rest_framework import status
 from rest_framework.reverse import reverse
 
+from accounts.serializers import UserRetrieveSerializer
+
 GeneralUser = get_user_model()
 pytestmark = pytest.mark.django_db(transaction=True)
+
+
+class TestRetrieveView:
+    url = reverse('user-retrieve-me')
+    serializer_class = UserRetrieveSerializer
+
+    def test_view_isnt_allowed_for_unauthenticated_user(self, api_client, test_user):
+        response = api_client.get(self.url)
+
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+
+    def test_view_returns_expected_data(self, api_client, test_user):
+        api_client.force_login(test_user)
+        response = api_client.get(self.url)
+
+        assert response.status_code == status.HTTP_200_OK
+        expected_data = self.serializer_class(instance=test_user).data
+        assert response.data == expected_data
 
 
 class TestLogoutView:
