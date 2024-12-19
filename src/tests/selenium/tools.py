@@ -59,8 +59,30 @@ def wait_for_element(
     assert element.is_displayed() is is_disabled
     assert element.is_enabled() is is_enabled
     if expected_text is not None:
-        assert element.text == expected_text
+        assert element.text == expected_text, f'{element.text} not equal {expected_text}'
     return element
+
+
+@explicit_wait(
+    [
+        ElementNotVisibleException,
+        ElementNotInteractableException,
+        ElementNotSelectableException,
+        NoSuchElementException,
+        InvalidElementStateException,
+        StaleElementReferenceException,
+    ]
+)
+def wait_for_elements(
+    fn: Callable[..., list[WebElement]], is_disabled=True, is_enabled=True, expected_count=None
+) -> list[WebElement]:
+    elements = fn()
+    if expected_count is not None:
+        assert len(elements) == expected_count, f'{len(elements)} not equal {expected_count}'
+    for element in elements:
+        assert element.is_displayed() is is_disabled
+        assert element.is_enabled() is is_enabled
+    return elements
 
 
 @explicit_wait([ElementClickInterceptedException])

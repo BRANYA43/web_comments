@@ -24,7 +24,68 @@ function set_invalid_feedback(xhr, form) {
     }
 }
 
+function format_date(iso_datetime) {
+    let datetime = new Date(iso_datetime);
+    let day = String(datetime.getDate()).padStart(2, '0');
+    let month = String(datetime.getMonth()).padStart(2, '0');
+    let year = datetime.getFullYear();
+    return `${day}.${month}.${year}`
+}
+
+function format_time(iso_datetime) {
+    let datetime = new Date(iso_datetime);
+    let hours = String(datetime.getHours()).padStart(2, '0');
+    let minutes = String(datetime.getMinutes()).padStart(2, '0');
+    let seconds = String(datetime.getSeconds()).padStart(2, '0');
+    return `[${hours}:${minutes}:${seconds}]`;
+}
+
+function add_table_row(data, tbody) {
+    tbody.append(`
+        <tr id="${data.uuid}" class="align-middle" style="height: 90px;">
+        <td>${data.user.email}</td>
+        <td>${data.user.username}</td>
+        <td class="w-100"><div class="text-truncate-multiline">${data.text}</div></td>
+        <td>${format_date(data.updated)}<br>${format_time(data.updated)}</td>
+        <td>${format_date(data.created)}<br>${format_time(data.created)}</td>
+        <td>
+            <div class="d-flex flex-column">
+            <a name="read" class="text-decoration-none align-self-center" href="/api/comments/comments/${data.uuid}/">
+                ${feather.icons['book-open'].toSvg()}
+            </a>
+            </div>
+        </td>
+        </tr>
+    `);
+}
+
+function fill_table() {
+    console.log('run fill table')
+    var tbody = $('#comment_table').find('tbody')
+    $.ajax({
+        type: 'get',
+        url: '/api/comments/comments/?target_is_null=true',
+        dataType: 'json',
+        success: function (response) {
+            console.log(response);
+            if (response && response.count != 0) {
+                for (let data of response.results) {
+                    add_table_row(data, tbody);
+                }
+            } else {
+                console.log('show empty row');
+                $('#empty_row').removeClass('d-none');
+            }
+        },
+        error: function(xhr, status, error) {
+            console.log(xhr)
+        }
+    });
+}
+
 $(document).ready(function() {
+    fill_table()
+
     $('#register_form').submit(function (e) {
         e.preventDefault();
 
