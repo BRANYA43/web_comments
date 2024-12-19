@@ -59,32 +59,97 @@ function add_table_row(data, tbody) {
     `);
 }
 
-function fill_table() {
-    console.log('run fill table')
+function fill_table(response) {
     var tbody = $('#comment_table').find('tbody')
+
+    if (response && response.count != 0) {
+        tbody.empty();
+        for (let data of response.results) {
+            add_table_row(data, tbody);
+        }
+        if (response.count > response.results.length) {
+            $('#paginator_block').removeClass('d-none');
+            set_paginate_pages(response);
+        }
+    } else {
+        $('#empty_row').removeClass('d-none');
+    }
+}
+
+function start_fill_table() {
     $.ajax({
         type: 'get',
         url: '/api/comments/comments/?target_is_null=true',
         dataType: 'json',
         success: function (response) {
-            console.log(response);
-            if (response && response.count != 0) {
-                for (let data of response.results) {
-                    add_table_row(data, tbody);
-                }
-            } else {
-                console.log('show empty row');
-                $('#empty_row').removeClass('d-none');
-            }
+            fill_table(response)
         },
         error: function(xhr, status, error) {
-            console.log(xhr)
+            console.log(xhr);
         }
     });
 }
 
+function set_paginate_pages(response) {
+    var current_page = response.current_page
+    var total_pages = response.total_pages
+    for (let link_name of ['first', 'previous', 'next', 'last']) {
+            var link = $(`#${link_name}_page`)
+            var url = response[link_name]
+            if (url == null || new RegExp(`\\?page=${current_page}(?:&|$)`).test(url)) {
+                link.addClass('disabled');
+                link.attr('href', '#');
+            } else {
+                link.removeClass('disabled');
+                link.attr('href', url);
+            }
+        }
+
+    var pages
+    if (current_page <= 3) {
+        pages = [1, 2, 3, 4, 5];
+    } else if (current_page >= total_pages - 2) {
+        pages = [total_pages - 4, total_pages - 3, total_pages - 2, total_pages - 1, total_pages];
+    } else {
+        pages = [current_page - 2, current_page -1, current_page, current_page + 1, current_page + 2];
+    }
+
+    var previous_li = $('#previous_page').parent();
+    var next_li = $('#next_page').parent();
+    previous_li.nextUntil(next_li).remove();
+
+    for (let i of pages) {
+        var extra_classes = ''
+        if (i == response.current_page) {
+            extra_classes = 'active'
+        }
+        next_li.before(`
+            <li class="page-item"><a id="page_${i}" class="page-link ${extra_classes}" href="/api/comments/comments/?page=${i}&target_is_null=true">${i}</a></li>
+        `)
+    }
+}
+
+
 $(document).ready(function() {
-    fill_table()
+    start_fill_table()
+    $('#table_paginator').on('click', 'a', function (e) {
+        e.preventDefault();
+
+        var link = $(this)
+
+        $.ajax({
+            type: 'get',
+            url: link.attr('href'),
+            dataType: 'json',
+            success: function (response) {
+                fill_table(response);
+            },
+            error: function(xhr, status, error) {
+                console.log(xhr);
+            }
+        });
+        set_paginate_pages
+    })
 
     $('#register_form').submit(function (e) {
         e.preventDefault();

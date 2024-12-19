@@ -4,7 +4,11 @@ from typing import Callable, TypeVar, Iterable, Type, Any
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Model
-from selenium.common import ElementClickInterceptedException
+from selenium.common import (
+    ElementClickInterceptedException,
+    ElementNotInteractableException,
+    MoveTargetOutOfBoundsException,
+)
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver.remote.webelement import WebElement
@@ -37,7 +41,7 @@ def explicit_wait(extra_errors: Iterable[Type[Exception]] = (), timeout=3):
     return decorator
 
 
-@explicit_wait([ElementClickInterceptedException])
+@explicit_wait([ElementClickInterceptedException, ElementNotInteractableException])
 def wait_to_click(element: WebElement):
     element.click()
 
@@ -50,6 +54,11 @@ def wait_to_get_model_instance(model: Type[TModel], **kwargs) -> TModel:
 def call_delay(fn: Callable[..., T], delay=0.5) -> T:
     sleep(delay)
     return fn()
+
+
+@explicit_wait([ElementNotInteractableException, MoveTargetOutOfBoundsException])
+def wait_to_scroll(driver: WebDriver, element: WebElement):
+    driver.execute_script(f'window.scrollTo(0, {element.location['y']});')
 
 
 def submit_form(form: WebElement, data: dict[str, Any]):
