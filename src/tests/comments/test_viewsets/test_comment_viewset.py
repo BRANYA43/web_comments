@@ -19,14 +19,20 @@ class TestListView:
 
     @pytest.fixture(autouse=True)
     def comments(self, comment_factory, owner):
-        comment_factory.create_batch(30, user=owner)
+        comment_factory.create_batch(60, user=owner)
 
     def test_view_paginates_comments_into_25_pieces_per_page(self, api_client):
         response = api_client.get(self.url)
 
         assert response.status_code == status.HTTP_200_OK
         assert len(response.data['results']) == 25
-        assert response.data['count'] == 30
+        assert response.data['count'] == 60
+        assert response.data['total_pages'] == 3
+        assert response.data['current_page'] == 1
+        assert '?page=1' in str(response.data['first'])
+        assert '?page=3' in str(response.data['last'])
+        assert '?page=2' in str(response.data['next'])
+        assert response.data['previous'] is None
 
     def test_view_returns_expected_data(self, api_client):
         response = api_client.get(self.url)
@@ -47,7 +53,7 @@ class TestListView:
         response = api_client.get(self.url, data={'target_is_null': True})
         assert response.status_code == status.HTTP_200_OK
         assert len(response.data['results']) == 25
-        assert response.data['count'] == 30
+        assert response.data['count'] == 60
 
         response = api_client.get(self.url, data={'target_is_null': False})
         assert response.status_code == status.HTTP_200_OK

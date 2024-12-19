@@ -7,6 +7,7 @@ from rest_framework.viewsets import ModelViewSet
 
 from comments.filters import CommentFilter
 from comments.models import Comment
+from comments.paginators import PageNumberPaginator
 from comments.permissions import IsOwner
 from comments.serializers import (
     CommentListSerializer,
@@ -18,6 +19,7 @@ from comments.serializers import (
 
 class CommentViewSet(ModelViewSet):
     queryset = Comment.objects.select_related('user').all()
+    pagination_class = PageNumberPaginator
     serializer_classes: dict[str, Type[Serializer]] = {
         'list': CommentListSerializer,
         'retrieve': CommentRetrieveSerializer,
