@@ -4,17 +4,12 @@ from typing import Callable, TypeVar, Iterable, Type, Any
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Model
-from selenium.common import (
-    ElementClickInterceptedException,
-    ElementNotVisibleException,
-    ElementNotInteractableException,
-    ElementNotSelectableException,
-    NoSuchElementException,
-    InvalidElementStateException,
-    StaleElementReferenceException,
-)
+from selenium.common import ElementClickInterceptedException
+from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver.remote.webelement import WebElement
+from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.support import expected_conditions as ec
 
 WebObj = WebElement | WebDriver
 T = TypeVar('T')
@@ -33,7 +28,7 @@ def explicit_wait(extra_errors: Iterable[Type[Exception]] = (), timeout=3):
                     end = time()
                     if end - start >= timeout:
                         raise e
-                    sleep(0.25)
+                    sleep(0.5)
                 except Exception as e:
                     raise e
 
@@ -42,52 +37,9 @@ def explicit_wait(extra_errors: Iterable[Type[Exception]] = (), timeout=3):
     return decorator
 
 
-@explicit_wait(
-    [
-        ElementNotVisibleException,
-        ElementNotInteractableException,
-        ElementNotSelectableException,
-        NoSuchElementException,
-        InvalidElementStateException,
-        StaleElementReferenceException,
-    ]
-)
-def wait_for_element(
-    fn: Callable[..., WebElement], is_disabled=True, is_enabled=True, expected_text: Any = None
-) -> WebElement:
-    element = fn()
-    assert element.is_displayed() is is_disabled
-    assert element.is_enabled() is is_enabled
-    if expected_text is not None:
-        assert element.text == expected_text, f'{element.text} not equal {expected_text}'
-    return element
-
-
-@explicit_wait(
-    [
-        ElementNotVisibleException,
-        ElementNotInteractableException,
-        ElementNotSelectableException,
-        NoSuchElementException,
-        InvalidElementStateException,
-        StaleElementReferenceException,
-    ]
-)
-def wait_for_elements(
-    fn: Callable[..., list[WebElement]], is_disabled=True, is_enabled=True, expected_count=None
-) -> list[WebElement]:
-    elements = fn()
-    if expected_count is not None:
-        assert len(elements) == expected_count, f'{len(elements)} not equal {expected_count}'
-    for element in elements:
-        assert element.is_displayed() is is_disabled
-        assert element.is_enabled() is is_enabled
-    return elements
-
-
 @explicit_wait([ElementClickInterceptedException])
-def wait_to_click(fn: Callable[..., WebElement]):
-    wait_for_element(fn).click()
+def wait_to_click(element: WebElement):
+    element.click()
 
 
 @explicit_wait([ObjectDoesNotExist])
@@ -95,7 +47,7 @@ def wait_to_get_model_instance(model: Type[TModel], **kwargs) -> TModel:
     return model.objects.get(**kwargs)
 
 
-def call_delay(fn: Callable[..., T], delay=0.25) -> T:
+def call_delay(fn: Callable[..., T], delay=0.5) -> T:
     sleep(delay)
     return fn()
 
@@ -106,7 +58,8 @@ def submit_form(form: WebElement, data: dict[str, Any]):
     call_delay(form.submit)
 
 
-def login_user(webdriver: WebDriver, email: str, password: str):
-    wait_to_click(lambda: webdriver.find_element(value='nav_login'))
-    form = wait_for_element(lambda: webdriver.find_element(value='login_form'))
+def login_user(wait_driver: WebDriverWait, email: str, password: str):
+    login_link = wait_driver.until(ec.element_to_be_clickable((By.ID, 'nav_login')))
+    wait_to_click(login_link)
+    form = wait_driver.until(ec.visibility_of_element_located((By.ID, 'login_form')))
     submit_form(form, {'email_field': email, 'password_field': password})

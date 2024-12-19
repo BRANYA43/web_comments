@@ -1,4 +1,5 @@
 import pytest
+from selenium.webdriver.support.wait import WebDriverWait
 
 
 @pytest.fixture()
@@ -15,3 +16,11 @@ def morty(user_factory):
     user = user_factory.create(email='morty@test.com', username='morty1234', password=password)
     user.raw_password = password
     return user
+
+
+@pytest.fixture()
+def wait_driver(selenium) -> WebDriverWait:
+    return WebDriverWait(
+        selenium,
+        timeout=3,
+    )
