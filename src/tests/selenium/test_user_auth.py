@@ -17,7 +17,6 @@ class TestUserRegister:
     def test_user_registers(self, selenium: WebDriver, wait_driver, live_server):
         # user enters to the site
         selenium.get(live_server.url)
-        selenium.fullscreen_window()
 
         # user opens modal of register form and inputs his credentials in the form and submits it
         selenium.find_element(value='nav_register').click()

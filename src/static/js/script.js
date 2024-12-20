@@ -1,5 +1,104 @@
+function on_return_button() {
+    $('#main_comment_block').empty();
+    show_table();
+}
+
+function create_return_button() {
+    $('#main_comment_block').append(`
+        <button id='return' type="button" class="btn btn-primary mb-3" onclick="on_return_button()">Return</button>
+    `);
+
+}
+
+function hide_table() {
+    $('#table_block').hide();
+}
+
+function show_table() {
+    $('#table_block').show();
+}
+
+function create_comment_template(data, comment_type) {
+    var image_link = '';
+    var file_link = '';
+
+    if (data.image) {
+        image_link = `
+            <a id="image" href="${data.image}" data-lightbox="${data.uuid}" class="me-2">
+                <img src="${data.image}" class='img-thumbnail' style="width: 60px;">
+            </a>
+        `
+    }
+
+    if (data.file) {
+        file_link = `
+            <a id="file" href="${data.file}" download>
+                ${feather.icons['file-text'].toSvg({style: "width: 40px; height: 40px;"})}
+            </a>
+        `
+    }
+
+    let template = `
+        <div id="${data.uuid}" data-comment-type=${comment_type}>
+          <div class="card mb-3">
+            <div class="card-header d-flex justify-content-between">
+              <h6 class="text-primary-emphasis">${data.user.username} | ${data.user.email}</h6>
+              <h6 class="text-primary-emphasis">
+                Updated: ${format_date(data.updated)} ${format_time(data.updated)} |
+                Created: ${format_date(data.created)} ${format_time(data.created)}
+              </h6>
+            </div>
+            <div class="card-body">
+              <p class="card-text">
+                ${data.text}
+              </p>
+              <div id="media" class="d-flex flex-row">
+                ${image_link}
+                ${file_link}
+              </div>
+            </div>
+          </div>
+          <div id="answers" class='ps-5'></div>
+        </div>
+    `
+    return template
+}
+
+
+
+function add_comment_to_element(element, data, comment_type) {
+    let comment = create_comment_template(data, comment_type);
+    element.append(comment);
+}
+
+function show_comment_detail(data) {
+    add_comment_to_element($('#main_comment_block'), data, 'main_comment');
+};
+
+
 $(document).ready(function() {
     start()
+    $('#comment_table').on('click', 'a[name="read"]', function(e) {
+        e.preventDefault();
+
+        let link = $(this);
+
+        $.ajax({
+            type: 'get',
+            url: link.attr('href'),
+            dataType: 'json',
+            success: function (response) {
+                hide_table();
+                create_return_button();
+                show_comment_detail(response);
+            },
+            error: function(xhr, status, error) {
+                console.log(xhr);
+            }
+        });
+
+    });
+
     $('#table_paginator').on('click', 'a', function (e) {
         e.preventDefault();
 

@@ -3,13 +3,11 @@
   {% include 'components/navbar/navbar.html' %}
 {% endblock header_content %}
 {% block main_content %}
-  <div>
+  <div id="table_block">
     {% include 'components/table.html' %}
+    <div id="paginator_block" class="d-flex justify-content-center d-none">
+      {% include 'components/paginator.html' %}
+    </div>
   </div>
-  <div id="paginator_block" class="d-flex justify-content-center d-none">
-    {% include 'components/paginator.html' %}
-  </div>
-  <div>
-    {% include 'components/comment/edit_form.html' %}
-  </div>
+  <div id="main_comment_block"></div>
 {% endblock main_content %}
