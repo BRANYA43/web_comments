@@ -1,4 +1,94 @@
-function clean_validated_form(form) {
+$(document).ready(function() {
+    start()
+    $('#table_paginator').on('click', 'a', function (e) {
+        e.preventDefault();
+
+        var link = $(this)
+
+        $.ajax({
+            type: 'get',
+            url: link.attr('href'),
+            dataType: 'json',
+            success: function (response) {
+                fill_table(response);
+            },
+            error: function(xhr, status, error) {
+                console.log(xhr);
+            }
+        });
+        set_paginate_pages
+    })
+
+    $('#register_form').submit(function (e) {
+        e.preventDefault();
+
+        var form = $(this);
+        reset_validity_form(form);
+
+        $.ajax({
+            type: form.attr('method'),
+            url: form.attr('action'),
+            data: form.serialize(),
+            success: function (response) {
+                form.find('[type="reset"]').click();
+            },
+            error: function(xhr, status, error) {
+                set_validity_form(xhr, form);
+            }
+        });
+    });
+
+    $('#nav_logout').click(function (e) {
+        e.preventDefault();
+
+        var link = $(this)
+
+        $.ajax({
+            type: 'get',
+            url: link.attr('href'),
+            success: function (response) {
+                location.reload();
+            },
+        });
+    });
+
+    $('#login_form').submit(function(e) {
+        e.preventDefault();
+
+        var form = $(this);
+        reset_validity_form(form);
+
+        $.ajax({
+            type: form.attr('method'),
+            url: form.attr('action'),
+            data: form.serialize(),
+            success: function (response) {
+                form.find('[type="reset"]').click();
+                location.reload();
+            },
+            error: function(xhr, status, error) {
+                set_validity_form(xhr, form);
+            }
+        });
+    });
+});
+
+function start() {
+    $.ajax({
+        type: 'get',
+        url: '/api/comments/comments/?target_is_null=true',
+        dataType: 'json',
+        success: function (response) {
+            fill_table(response)
+        },
+        error: function(xhr, status, error) {
+            console.log(xhr);
+        }
+    });
+}
+
+
+function reset_validity_form(form) {
     form.find('input').each(function() {
         $(this).siblings('.invalid-feedback').text('');
         $(this).removeClass('is-invalid');
@@ -7,7 +97,7 @@ function clean_validated_form(form) {
     form.find('#form_errors').addClass('d-none')
 }
 
-function set_invalid_feedback(xhr, form) {
+function set_validity_form(xhr, form) {
     if (xhr.responseJSON && xhr.responseJSON.errors) {
         xhr.responseJSON.errors.forEach(function(error) {
             var field_name = error.attr;
@@ -22,22 +112,6 @@ function set_invalid_feedback(xhr, form) {
             }
         });
     }
-}
-
-function format_date(iso_datetime) {
-    let datetime = new Date(iso_datetime);
-    let day = String(datetime.getDate()).padStart(2, '0');
-    let month = String(datetime.getMonth()).padStart(2, '0');
-    let year = datetime.getFullYear();
-    return `${day}.${month}.${year}`
-}
-
-function format_time(iso_datetime) {
-    let datetime = new Date(iso_datetime);
-    let hours = String(datetime.getHours()).padStart(2, '0');
-    let minutes = String(datetime.getMinutes()).padStart(2, '0');
-    let seconds = String(datetime.getSeconds()).padStart(2, '0');
-    return `[${hours}:${minutes}:${seconds}]`;
 }
 
 function add_table_row(data, tbody) {
@@ -59,6 +133,22 @@ function add_table_row(data, tbody) {
     `);
 }
 
+function format_date(iso_datetime) {
+    let datetime = new Date(iso_datetime);
+    let day = String(datetime.getDate()).padStart(2, '0');
+    let month = String(datetime.getMonth()).padStart(2, '0');
+    let year = datetime.getFullYear();
+    return `${day}.${month}.${year}`
+}
+
+function format_time(iso_datetime) {
+    let datetime = new Date(iso_datetime);
+    let hours = String(datetime.getHours()).padStart(2, '0');
+    let minutes = String(datetime.getMinutes()).padStart(2, '0');
+    let seconds = String(datetime.getSeconds()).padStart(2, '0');
+    return `[${hours}:${minutes}:${seconds}]`;
+}
+
 function fill_table(response) {
     var tbody = $('#comment_table').find('tbody')
 
@@ -74,20 +164,6 @@ function fill_table(response) {
     } else {
         $('#empty_row').removeClass('d-none');
     }
-}
-
-function start_fill_table() {
-    $.ajax({
-        type: 'get',
-        url: '/api/comments/comments/?target_is_null=true',
-        dataType: 'json',
-        success: function (response) {
-            fill_table(response)
-        },
-        error: function(xhr, status, error) {
-            console.log(xhr);
-        }
-    });
 }
 
 function set_paginate_pages(response) {
@@ -128,79 +204,3 @@ function set_paginate_pages(response) {
         `)
     }
 }
-
-
-$(document).ready(function() {
-    start_fill_table()
-    $('#table_paginator').on('click', 'a', function (e) {
-        e.preventDefault();
-
-        var link = $(this)
-
-        $.ajax({
-            type: 'get',
-            url: link.attr('href'),
-            dataType: 'json',
-            success: function (response) {
-                fill_table(response);
-            },
-            error: function(xhr, status, error) {
-                console.log(xhr);
-            }
-        });
-        set_paginate_pages
-    })
-
-    $('#register_form').submit(function (e) {
-        e.preventDefault();
-
-        var form = $(this);
-        clean_validated_form(form);
-
-        $.ajax({
-            type: form.attr('method'),
-            url: form.attr('action'),
-            data: form.serialize(),
-            success: function (response) {
-                form.find('[type="reset"]').click();
-            },
-            error: function(xhr, status, error) {
-                set_invalid_feedback(xhr, form);
-            }
-        });
-    });
-
-    $('#nav_logout').click(function (e) {
-        e.preventDefault();
-
-        var link = $(this)
-
-        $.ajax({
-            type: 'get',
-            url: link.attr('href'),
-            success: function (response) {
-                location.reload();
-            },
-        });
-    });
-
-    $('#login_form').submit(function(e) {
-        e.preventDefault();
-
-        var form = $(this);
-        clean_validated_form(form);
-
-        $.ajax({
-            type: form.attr('method'),
-            url: form.attr('action'),
-            data: form.serialize(),
-            success: function (response) {
-                form.find('[type="reset"]').click();
-                location.reload();
-            },
-            error: function(xhr, status, error) {
-                set_invalid_feedback(xhr, form);
-            }
-        });
-    });
-});
