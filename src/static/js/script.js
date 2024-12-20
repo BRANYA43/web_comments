@@ -10,6 +10,14 @@ function create_return_button() {
 
 }
 
+function create_show_comments_yet_link(target, next_page_url) {
+    target.find('#answer_block').append(`
+        <div class="d-flex justify-content-center">
+            <a id="show_comments_yet" class="link-secondary" data-target-id="#${target.attr('id')}" href="${next_page_url}">Show Yet Comments</a>
+        </div>
+    `)
+}
+
 function hide_table() {
     $('#table_block').hide();
 }
@@ -39,7 +47,7 @@ function create_comment_template(data, comment_type) {
     }
 
     let template = `
-        <div id="${data.uuid}" data-comment-type=${comment_type}>
+        <div id="comment_detail_${data.uuid}" data-comment-id="${data.uuid}" data-comment-type=${comment_type}>
           <div class="card mb-3">
             <div class="card-header d-flex justify-content-between">
               <h6 class="text-primary-emphasis">${data.user.username} | ${data.user.email}</h6>
@@ -58,7 +66,7 @@ function create_comment_template(data, comment_type) {
               </div>
             </div>
           </div>
-          <div id="answers" class='ps-5'></div>
+          <div id="answer_block" class='ps-5'></div>
         </div>
     `
     return template
@@ -71,13 +79,48 @@ function add_comment_to_element(element, data, comment_type) {
     element.append(comment);
 }
 
+function show_comment_answers(target, next_page_url=undefined) {
+    let url
+    if (next_page_url) {
+        url = next_page_url
+    } else {
+        url = `api/comments/comments/?target=${target.attr('data-comment-id')}`
+    }
+
+    $.ajax({
+        type: 'get',
+        url: url,
+        dataType: 'json',
+        success: function (response) {
+            if (response.results) {
+                for (answer_data of response.results) {
+                    add_comment_to_element(target.find('#answer_block'), answer_data, comment_type='answer');
+                }
+                if (response.next) {
+                    create_show_comments_yet_link(target, response.next);
+                }
+            }
+        }
+    })
+}
+
 function show_comment_detail(data) {
     add_comment_to_element($('#main_comment_block'), data, 'main_comment');
+    main_comment = $('#main_comment_block [data-comment-type="main_comment"]');
+    show_comment_answers(main_comment);
 };
 
 
 $(document).ready(function() {
     start()
+    $(document).on('click', '#show_comments_yet', function(e) {
+        e.preventDefault();
+        let link = $(this);
+        let target = $(link.attr('data-target-id'));
+        show_comment_answers(target, link.attr('href'));
+        link.remove();
+    });
+
     $('#comment_table').on('click', 'a[name="read"]', function(e) {
         e.preventDefault();
 
