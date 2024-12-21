@@ -22,3 +22,7 @@
 .ql-toolbar.ql-snow {
     border: none !important;
 }
+
+#text_editor.ql-container.ql-snow > .ql-editor {
+    min-height: 200px;
+}

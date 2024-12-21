@@ -256,6 +256,15 @@ function start() {
             console.log(xhr);
         }
     });
+    const quill = new Quill('#text_editor', {
+    theme: 'snow',
+    modules: {
+      toolbar: [
+        ['bold', 'italic', 'underline', 'strike'],
+        ['code', 'code-block', 'link'],
+      ]
+    }
+});
 }
 
 
