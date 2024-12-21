@@ -2,13 +2,15 @@
 {% block modal_id %}editor{% endblock modal_id %}
 {% block modal_title %}TITLE{% endblock modal_title %}
 {% block form_id %}editor{% endblock form_id %}
-{% block form_action %}{% url 'comment-list' %}{% endblock form_action %}
+{% block form_action %}URL{% endblock form_action %}
 {% block extra_modal_classes %}modal-lg{% endblock extra_modal_classes %}
 {% block form_method %}METHOD{% endblock form_method %}
 {% block submit_name %}SUBMIT{% endblock submit_name %}
 {% block form_fields %}
+  <input id="target_field" type="text" name="target" value="" hidden>
   <div class="mb-3 border rounded">
     <div id="text_editor"></div>
+    <input id="text_field" type="text" name="text" value="" hidden required>
     <div class="invalid-feedback"></div>
   </div>
   <div class="mb-3">

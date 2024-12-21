@@ -128,6 +128,42 @@ function show_comment_detail(data) {
 
 $(document).ready(function() {
     start()
+    $('#nav_create_comment').click(function (e) {
+        var form = $('#editor_form');
+        form.attr('method', 'post');
+        form.attr('action', 'api/comments/comments/');
+        form.find('h1').text('Create New Comment');
+        form.find('button[type="submit"]').text('Publish');
+    });
+
+    $('#editor_form button[type="reset"]').click(function (e) {
+        $('#editor_form #text_editor div[contenteditable="true"]').html('<p><br></p>');
+    });
+
+    $('#editor_form').submit(function (e) {
+        e.preventDefault();
+
+        var form = $(this);
+
+        reset_validity_form(form);
+        var text_field_value = form.find('#text_editor div[contenteditable="true"]').html()
+        if (text_field_value != '<p><br></p>') {
+            form.find('#text_field').attr('value', text_field_value);
+        }
+
+        $.ajax({
+            type: form.attr('method'),
+            url: form.attr('action'),
+            data: form.serialize(),
+            success: function (response) {
+                form.find('[type="reset"]').click();
+            },
+            error: function(xhr, status, error) {
+                set_validity_form(xhr, form);
+            }
+        });
+    });
+
     $(document).on('click', 'a[name="show_answers"]', function(e){
         var link = $(this);
         var target = $(`#main_comment_block #comment_detail_${link.attr('data-target-id')}`);

@@ -3,8 +3,38 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.support.wait import WebDriverWait
 
+from comments.models import Comment
 from tests.comments.conftest import get_uploaded_file, get_uploaded_image
-from tests.selenium.tools import wait_to_click, wait_to_scroll
+from tests.selenium.tools import wait_to_click, wait_to_scroll, login_user, call_delay, wait_to_get_model_instance
+
+
+@pytest.mark.django_db(transaction=True)
+class TestCommentCreate:
+    def test_user_create_new_main_comment(self, selenium, wait_driver, live_server, rick):
+        # user enters to the site
+        selenium.get(live_server.url)
+
+        # user logs in
+        login_user(wait_driver, rick.email, rick.raw_password)
+
+        # user opens editor modal form and creates comment
+        create_link = wait_driver.until(ec.element_to_be_clickable((By.ID, 'nav_create_comment')))
+        wait_to_click(create_link)
+        editor_form = wait_driver.until(ec.visibility_of_element_located((By.ID, 'editor_form')))
+        div_text = editor_form.find_element(By.CSS_SELECTOR, '#text_editor div[contenteditable="true"]')
+        div_text.send_keys('Some Text from Rick')
+        call_delay(editor_form.submit)
+
+        # wait created comment
+        wait_to_get_model_instance(Comment, user=rick)
+        selenium.refresh()
+
+        # user sees his comment in the table
+        comment = wait_driver.until(ec.visibility_of_element_located((By.CSS_SELECTOR, '#comment_table tbody tr')))
+        comment_text = comment.find_element(By.CSS_SELECTOR, 'td.w-100 div.text-truncate-multiline').text
+        rick.refresh_from_db()
+        comment_instance = rick.comment_set.first()
+        assert comment_text in comment_instance.text
 
 
 @pytest.mark.django_db(transaction=True)
