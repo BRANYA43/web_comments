@@ -34,7 +34,12 @@ class CommentRetrieveSerializer(serializers.ModelSerializer):
 class CommentCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
-        fields = ('user', 'target', 'text', 'image', 'file')
+        fields = ('target', 'text', 'image', 'file')
+
+    def create(self, validated_data):
+        user = self.context['request'].user
+        validated_data['user'] = user
+        return super().create(validated_data)
 
 
 class CommentUpdateSerializer(serializers.ModelSerializer):
