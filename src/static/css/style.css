@@ -14,3 +14,11 @@
 .focus-outline-none:focus {
     box-shadow: none;
 }
+
+#text_editor.ql-container.ql-snow {
+    border: none !important;
+}
+
+.ql-toolbar.ql-snow {
+    border: none !important;
+}
