@@ -11,9 +11,9 @@ function create_return_button() {
 }
 
 function create_show_comments_yet_link(target, next_page_url) {
-    target.find('#answer_block').append(`
+    target.find(`#answer_block_${target.attr('data-comment-id')}`).append(`
         <div class="d-flex justify-content-center">
-            <a id="show_comments_yet" class="link-secondary" data-target-id="#${target.attr('id')}" href="${next_page_url}">Show Yet Comments</a>
+            <a id="show_comments_yet_${target.attr('data-comment-id')}" class="link-secondary" data-target-id="#${target.attr('id')}" href="${next_page_url}">Show Yet Comments</a>
         </div>
     `)
 }
@@ -28,8 +28,6 @@ function show_table() {
 
 function create_comment_template(data, comment_type) {
     var image_link = '';
-    var file_link = '';
-
     if (data.image) {
         image_link = `
             <a id="image" href="${data.image}" data-lightbox="${data.uuid}" class="me-2">
@@ -38,6 +36,7 @@ function create_comment_template(data, comment_type) {
         `
     }
 
+    var file_link = '';
     if (data.file) {
         file_link = `
             <a id="file" href="${data.file}" download>
@@ -46,27 +45,41 @@ function create_comment_template(data, comment_type) {
         `
     }
 
+    var comment_footer = '';
+    var add_collapse_class = ''
+    if (comment_type.includes('answer')) {
+        add_collapse_class = 'collapse'
+        comment_footer = `
+            <div class="card-footer">
+                <a name="show_answers" role="button" class="card-link text-decoration-none" data-bs-toggle="collapse" href="#answer_block_${data.uuid}" data-target-id="${data.uuid}" data-collapse-open="false">
+                    ${feather.icons['message-square'].toSvg({class: 'icon-size-20'})}
+                </a>
+            </div>
+        `
+    }
+
     let template = `
         <div id="comment_detail_${data.uuid}" data-comment-id="${data.uuid}" data-comment-type=${comment_type}>
-          <div class="card mb-3">
-            <div class="card-header d-flex justify-content-between">
-              <h6 class="text-primary-emphasis">${data.user.username} | ${data.user.email}</h6>
-              <h6 class="text-primary-emphasis">
-                Updated: ${format_date(data.updated)} ${format_time(data.updated)} |
-                Created: ${format_date(data.created)} ${format_time(data.created)}
-              </h6>
+            <div class="card mb-3">
+                <div class="card-header d-flex justify-content-between">
+                    <h6 class="text-primary-emphasis">${data.user.username} | ${data.user.email}</h6>
+                    <h6 class="text-primary-emphasis">
+                        Updated: ${format_date(data.updated)} ${format_time(data.updated)} |
+                        Created: ${format_date(data.created)} ${format_time(data.created)}
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">
+                        ${data.text}
+                    </p>
+                    <div id="media" class="d-flex flex-row">
+                        ${image_link}
+                        ${file_link}
+                    </div>
+                </div>
+                ${comment_footer}
             </div>
-            <div class="card-body">
-              <p class="card-text">
-                ${data.text}
-              </p>
-              <div id="media" class="d-flex flex-row">
-                ${image_link}
-                ${file_link}
-              </div>
-            </div>
-          </div>
-          <div id="answer_block" class='ps-5'></div>
+          <div id="answer_block_${data.uuid}" class='ps-5 ${add_collapse_class}'></div>
         </div>
     `
     return template
@@ -87,6 +100,8 @@ function show_comment_answers(target, next_page_url=undefined) {
         url = `api/comments/comments/?target=${target.attr('data-comment-id')}`
     }
 
+    var answer_block = target.find(`#answer_block_${target.attr('data-comment-id')}`)
+
     $.ajax({
         type: 'get',
         url: url,
@@ -94,7 +109,7 @@ function show_comment_answers(target, next_page_url=undefined) {
         success: function (response) {
             if (response.results) {
                 for (answer_data of response.results) {
-                    add_comment_to_element(target.find('#answer_block'), answer_data, comment_type='answer');
+                    add_comment_to_element(answer_block, answer_data, comment_type='answer');
                 }
                 if (response.next) {
                     create_show_comments_yet_link(target, response.next);
@@ -113,7 +128,21 @@ function show_comment_detail(data) {
 
 $(document).ready(function() {
     start()
-    $(document).on('click', '#show_comments_yet', function(e) {
+    $(document).on('click', 'a[name="show_answers"]', function(e){
+        var link = $(this);
+        var target = $(`#main_comment_block #comment_detail_${link.attr('data-target-id')}`);
+        if (link.attr('data-collapse-open') == 'false') {
+            link.attr('data-collapse-open', 'true')
+            show_comment_answers(target);
+        } else {
+            link.attr('data-collapse-open', 'false')
+            var answer_block = target.find(`#answer_block_${target.attr('data-comment-id')}`);
+            answer_block.empty();
+        }
+
+    });
+
+    $(document).on('click', '[id^="show_comments_yet"]', function(e) {
         e.preventDefault();
         let link = $(this);
         let target = $(link.attr('data-target-id'));
