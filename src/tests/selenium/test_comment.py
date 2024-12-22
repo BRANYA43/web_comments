@@ -15,6 +15,7 @@ from tests.selenium.tools import (
 )
 
 
+@pytest.mark.django_db(transaction=True)
 class TestAnswerAndCommentDelete:
     @pytest.fixture()
     def test_main_comment_with_answers(self, comment_factory, rick):
@@ -87,6 +88,7 @@ class TestAnswerAndCommentDelete:
         )
 
 
+@pytest.mark.django_db(transaction=True)
 class TestAnswerCreate:
     @pytest.fixture()
     def test_main_comment(self, comment_factory, rick):
@@ -122,7 +124,7 @@ class TestAnswerCreate:
         send_comment(wait_driver, 'Answer of Rick')
 
         # wait created comment
-        answer_instance = wait_to_get_model_instance(Comment, user=rick)
+        answer_instance = wait_to_get_model_instance(Comment, text='<p>Answer of Rick</p>')
 
         # user sees his answer on main comment
         all_answers = wait_main_comment.until(
