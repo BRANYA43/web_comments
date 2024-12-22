@@ -259,19 +259,22 @@ function create_comment_template(data, comment_type) {
         `
     }
 
-    var not_owner_links = '';
-    var add_collapse_class = '';
-    if (comment_type.includes('answer')) {
-        add_collapse_class = 'collapse'
-        not_owner_links = `
-            <a name="answer" role="button" class="card-link text-decoration-none" data-target-id="${data.uuid}">
-                Answer
-            </a>
-            <a name="show_answers" role="button" class="card-link text-decoration-none" data-bs-toggle="collapse" href="#answer_block_${data.uuid}" data-target-id="${data.uuid}" data-collapse-open="false">
-                ${feather.icons['message-square'].toSvg({class: 'icon-size-20'})}
-            </a>
-        `
+    var show_class = '';
+    var aria_expanded = 'false'
+    var data_collapse_open = 'false'
+    if (comment_type.includes('main_comment')) {
+        show_class = 'show'
+        aria_expanded = 'true'
+        data_collapse_open = 'true'
     }
+    var not_owner_links = `
+        <a name="answer" role="button" class="card-link text-decoration-none" data-target-id="${data.uuid}">
+            Answer
+        </a>
+        <a name="show_answers" role="button" class="card-link text-decoration-none" data-bs-toggle="collapse" href="#answer_block_${data.uuid}" data-target-id="${data.uuid}" data-collapse-open="${data_collapse_open}">
+            ${feather.icons['message-square'].toSvg({class: 'icon-size-20'})}
+        </a>
+    `
 
     let template = `
         <div id="comment_detail_${data.uuid}" data-comment-id="${data.uuid}" data-comment-type=${comment_type}>
@@ -297,7 +300,7 @@ function create_comment_template(data, comment_type) {
                     ${owner_links}
                 </div>
             </div>
-          <div id="answer_block_${data.uuid}" class='ps-5 ${add_collapse_class}'></div>
+          <div id="answer_block_${data.uuid}" class='ps-5 collapse ${show_class}' aria-expanded="${aria_expanded}"></div>
         </div>
     `
     return template
