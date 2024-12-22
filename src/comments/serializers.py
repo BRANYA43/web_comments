@@ -32,9 +32,12 @@ class CommentRetrieveSerializer(serializers.ModelSerializer):
 
 
 class CommentCreateSerializer(serializers.ModelSerializer):
+    user = UserSerializerField(read_only=True)
+
     class Meta:
         model = Comment
-        fields = ('target', 'text', 'image', 'file')
+        fields = ('uuid', 'user', 'target', 'text', 'image', 'file', 'updated', 'created')
+        read_only_fields = ('uuid', 'updated', 'created')
 
     def create(self, validated_data):
         user = self.context['request'].user
