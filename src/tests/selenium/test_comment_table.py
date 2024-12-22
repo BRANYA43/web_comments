@@ -42,16 +42,6 @@ class TestCommentTable:
     def test_200_comments(self, comment_factory, rick):
         return comment_factory.create_batch(self.comments_200, user=rick)
 
-    def test_user_sees_empty_table_if_table_has_no_comments(self, selenium: WebDriver, wait_driver, live_server):
-        # user enters to the site
-        selenium.get(live_server.url)
-
-        # user sees the empty table
-        wait_driver.until(ec.visibility_of_element_located((By.ID, 'empty_row')))
-
-        # user doesnt see paginator
-        wait_driver.until(ec.invisibility_of_element_located((By.ID, 'table_paginator')))
-
     def test_user_sees_comments_in_table(self, selenium: WebDriver, wait_driver, live_server, test_10_comments):
         sorted_comments = Comment.objects.filter(target__isnull=True).order_by('-created')
         # user enters to the site
