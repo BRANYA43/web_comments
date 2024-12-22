@@ -1,5 +1,15 @@
 $(document).ready(function() {
     start()
+    $(document).on('click', 'a[name="answer"]', function(e) {
+        var link = $(this)
+        var form = $('#editor_form');
+        form.attr('method', 'post');
+        form.attr('action', 'api/comments/comments/');
+        form.find('h1').text('Create New Answer');
+        form.find('button[type="submit"]').text('Answer');
+        form.find('#target_field').attr('value', link.attr('data-target-id'));
+    });
+
     $('#nav_create_comment').click(function (e) {
         var form = $('#editor_form');
         form.attr('method', 'post');
@@ -16,19 +26,45 @@ $(document).ready(function() {
         e.preventDefault();
 
         var form = $(this);
+        var target_id = form.find('#target_field').val();
+        var show_answers_link = $(`#comment_detail_${target_id} a[name="show_answers"]`)
+        var answer_block = $(`#answer_block_${target_id}`)
+        var submit_button = form.find('button[type="submit"]');
+        console.log(answer_block.children().length > 25);
+        console.log(answer_block.children().not(':last').length);
+        console.log(answer_block.children().not(':last').last().remove());
 
         reset_validity_form(form);
-        var text_field_value = form.find('#text_editor div[contenteditable="true"]').html()
+        var text_field_value = form.find('#text_editor div[contenteditable="true"]').html();
         if (text_field_value != '<p><br></p>') {
             form.find('#text_field').attr('value', text_field_value);
         }
 
+        var form_data = form.serialize();
+
         $.ajax({
             type: form.attr('method'),
             url: form.attr('action'),
-            data: form.serialize(),
+            data: form_data,
             success: function (response) {
                 form.find('[type="reset"]').click();
+
+
+                if (show_answers_link.attr('aria-expanded') === 'false') {
+                    answer_block.addClass('show');
+                    show_answers_link.attr('aria-expanded', 'true');
+                    show_answers_link.click();
+                } else {
+                    if (submit_button.text().includes('Answer')) {
+                        add_comment_to_element(answer_block, response, comment_type='answer', prepend=true)
+                    }
+
+                    var answer_block_children = answer_block.children().not(':last')
+                    if (answer_block_children.length >= 25) {
+                            answer_block_children.last().remove();
+                    }
+                }
+
             },
             error: function(xhr, status, error) {
                 set_validity_form(xhr, form);
@@ -39,11 +75,9 @@ $(document).ready(function() {
     $(document).on('click', 'a[name="show_answers"]', function(e){
         var link = $(this);
         var target = $(`#main_comment_block #comment_detail_${link.attr('data-target-id')}`);
-        if (link.attr('data-collapse-open') == 'false') {
-            link.attr('data-collapse-open', 'true')
+        if (link.attr('aria-expanded') == 'true') {
             show_comment_answers(target);
         } else {
-            link.attr('data-collapse-open', 'false')
             var answer_block = target.find(`#answer_block_${target.attr('data-comment-id')}`);
             answer_block.empty();
         }
@@ -261,17 +295,15 @@ function create_comment_template(data, comment_type) {
 
     var show_class = '';
     var aria_expanded = 'false'
-    var data_collapse_open = 'false'
     if (comment_type.includes('main_comment')) {
         show_class = 'show'
         aria_expanded = 'true'
-        data_collapse_open = 'true'
     }
     var not_owner_links = `
-        <a name="answer" role="button" class="card-link text-decoration-none" data-target-id="${data.uuid}">
+        <a name="answer" role="button" class="card-link text-decoration-none" data-target-id="${data.uuid}" data-bs-toggle="modal" data-bs-target="#editor_modal">
             Answer
         </a>
-        <a name="show_answers" role="button" class="card-link text-decoration-none" data-bs-toggle="collapse" href="#answer_block_${data.uuid}" data-target-id="${data.uuid}" data-collapse-open="${data_collapse_open}">
+        <a name="show_answers" role="button" class="card-link text-decoration-none" data-bs-toggle="collapse" href="#answer_block_${data.uuid}" data-target-id="${data.uuid}" aria-expanded="${aria_expanded}">
             ${feather.icons['message-square'].toSvg({class: 'icon-size-20'})}
         </a>
     `
@@ -300,15 +332,20 @@ function create_comment_template(data, comment_type) {
                     ${owner_links}
                 </div>
             </div>
-          <div id="answer_block_${data.uuid}" class='ps-5 collapse ${show_class}' aria-expanded="${aria_expanded}"></div>
+          <div id="answer_block_${data.uuid}" class='ps-5 collapse ${show_class}'></div>
         </div>
     `
     return template
 }
 
-function add_comment_to_element(element, data, comment_type) {
+function add_comment_to_element(element, data, comment_type, prepend=false) {
     let comment = create_comment_template(data, comment_type);
-    element.append(comment);
+    if (prepend) {
+        element.prepend(comment);
+    } else {
+        element.append(comment);
+    }
+
 }
 
 function reset_validity_form(form) {

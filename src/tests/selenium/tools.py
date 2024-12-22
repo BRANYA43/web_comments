@@ -72,3 +72,10 @@ def login_user(wait_driver: WebDriverWait, email: str, password: str):
     wait_to_click(login_link)
     form = wait_driver.until(ec.visibility_of_element_located((By.ID, 'login_form')))
     submit_form(form, {'email_field': email, 'password_field': password})
+
+
+def send_comment(wait_driver, text: str):
+    editor_form = wait_driver.until(ec.visibility_of_element_located((By.ID, 'editor_form')))
+    div_text = editor_form.find_element(By.CSS_SELECTOR, '#text_editor div[contenteditable="true"]')
+    div_text.send_keys(text)
+    call_delay(editor_form.submit)
