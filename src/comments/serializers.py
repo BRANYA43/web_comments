@@ -18,7 +18,7 @@ class CommentListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Comment
-        fields = ('uuid', 'user', 'text', 'updated', 'created')
+        fields = ('uuid', 'user', 'text', 'image', 'file', 'updated', 'created')
         read_only_fields = fields
 
 
@@ -48,4 +48,5 @@ class CommentCreateSerializer(serializers.ModelSerializer):
 class CommentUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
-        fields = ('text', 'image', 'file')
+        fields = ('uuid', 'text', 'image', 'file', 'updated')
+        read_only_fields = ('uuid', 'updated')
