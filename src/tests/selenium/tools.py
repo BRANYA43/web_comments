@@ -51,6 +51,13 @@ def wait_to_get_model_instance(model: Type[TModel], **kwargs) -> TModel:
     return model.objects.get(**kwargs)
 
 
+@explicit_wait()
+def wait_to_count_model_instance(model: Type[TModel], expected_count: int, **kwargs) -> bool:
+    qs = model.objects.filter(**kwargs)
+    assert qs.count() == expected_count
+    return qs
+
+
 def call_delay(fn: Callable[..., T], delay=0.5) -> T:
     sleep(delay)
     return fn()

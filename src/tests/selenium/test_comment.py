@@ -5,7 +5,86 @@ from selenium.webdriver.support.wait import WebDriverWait
 
 from comments.models import Comment
 from tests.comments.conftest import get_uploaded_file, get_uploaded_image
-from tests.selenium.tools import wait_to_click, wait_to_scroll, login_user, wait_to_get_model_instance, send_comment
+from tests.selenium.tools import (
+    wait_to_click,
+    wait_to_scroll,
+    login_user,
+    wait_to_get_model_instance,
+    send_comment,
+    wait_to_count_model_instance,
+)
+
+
+class TestAnswerAndCommentDelete:
+    @pytest.fixture()
+    def test_main_comment_with_answers(self, comment_factory, rick):
+        main_comment = comment_factory.create(user=rick)
+        answers = comment_factory.create_batch(10, user=rick, target=main_comment)
+        return main_comment, answers
+
+    def test_user_deletes_his_comment(self, selenium, wait_driver, live_server, test_main_comment_with_answers, rick):
+        test_main_comment, test_answers = test_main_comment_with_answers
+        # user enters to the site
+        selenium.get(live_server.url)
+
+        # user logs in
+        login_user(wait_driver, rick.email, rick.raw_password)
+        wait_driver.until(ec.text_to_be_present_in_element((By.ID, 'nav_user_menu'), rick.email))
+
+        # user clicks on read link of main comment
+        read_link = wait_driver.until(ec.element_to_be_clickable((By.CSS_SELECTOR, '#comment_table a[name="read"]')))
+        wait_to_click(read_link)
+
+        # user clicks on delete link of main comment
+        main_comment = wait_driver.until(
+            ec.visibility_of_element_located((By.CSS_SELECTOR, 'div[data-comment-type="main_comment"]'))
+        )
+        wait_main_comment = WebDriverWait(main_comment, timeout=3)
+        delete_link = wait_main_comment.until(ec.element_to_be_clickable((By.CSS_SELECTOR, 'a[name="remove"]')))
+        wait_to_click(delete_link)
+
+        # wait deleting
+        wait_to_count_model_instance(Comment, expected_count=0, user=rick)
+
+        # user sees main comment was deletes from table
+        wait_driver.until(ec.invisibility_of_element_located((By.ID, test_main_comment.uuid)))
+
+    def test_user_delete_his_answer(self, selenium, wait_driver, live_server, test_main_comment_with_answers, rick):
+        test_main_comment, test_answers = test_main_comment_with_answers
+        test_first_answer = test_answers[-1]
+        # user enters to the site
+        selenium.get(live_server.url)
+
+        # user logs in
+        login_user(wait_driver, rick.email, rick.raw_password)
+        wait_driver.until(ec.text_to_be_present_in_element((By.ID, 'nav_user_menu'), rick.email))
+
+        # user clicks on read link of main comment
+        read_link = wait_driver.until(ec.element_to_be_clickable((By.CSS_SELECTOR, '#comment_table a[name="read"]')))
+        wait_to_click(read_link)
+
+        # user clicks on delete link of main comment
+        answers_of_main = wait_driver.until(
+            ec.visibility_of_all_elements_located(
+                (By.CSS_SELECTOR, '[id^="answer_block"] div[data-comment-type="answer"]')
+            )
+        )
+        assert len(answers_of_main) == 10
+        first_answer = answers_of_main[0]
+        wait_answer_of_main = WebDriverWait(first_answer, timeout=3)
+        delete_link = wait_answer_of_main.until(ec.element_to_be_clickable((By.CSS_SELECTOR, 'a[name="remove"]')))
+        wait_to_click(delete_link)
+
+        answers_of_main = wait_driver.until(
+            ec.visibility_of_all_elements_located(
+                (By.CSS_SELECTOR, '[id^="answer_block"] div[data-comment-type="answer"]')
+            )
+        )
+        assert len(answers_of_main) == 9
+
+        wait_driver.until(
+            ec.invisibility_of_element_located((By.CSS_SELECTOR, f'div[id="comment_detail_{test_first_answer.uuid}"]'))
+        )
 
 
 class TestAnswerCreate:

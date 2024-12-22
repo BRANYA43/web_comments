@@ -1,5 +1,34 @@
 $(document).ready(function() {
-    start()
+    start();
+    $(document).on('click', 'a[name="remove"]', function(e) {
+        e.preventDefault();
+
+        var link = $(this)
+
+        $.ajax({
+            type: 'delete',
+            url: link.attr('href'),
+            headers: {
+                'X-CSRFToken': Cookies.get('csrftoken'),
+            },
+            success: function (response) {
+                if ($(`#comment_table tbody tr[id="${link.attr('data-target-id')}"]`).length == 1) {
+                    console.log($(`#comment_table tbody tr[id="${link.attr('data-target-id')}"]`))
+                    $('#return').click();
+                    start();
+                } else {
+                    var comment = $(`#comment_detail_${link.attr('data-target-id')}[data-comment-type="answer"]`)
+                    var answer_block = comment.parent();
+                    var parent_comment = answer_block.parent();
+                    comment.remove();
+                    answer_block.empty();
+                    show_comment_answers(parent_comment);
+                }
+            }
+
+        });
+    });
+
     $(document).on('click', 'a[name="answer"]', function(e) {
         var link = $(this)
         var form = $('#editor_form');
@@ -184,29 +213,31 @@ $(document).ready(function() {
             }
         });
     });
+    const quill = new Quill('#text_editor', {
+        theme: 'snow',
+        modules: {
+          toolbar: [
+            ['bold', 'italic', 'underline', 'strike'],
+            ['code', 'code-block', 'link'],
+          ]
+        }
+    });
 });
 
 function start() {
+    console.log('start');
     $.ajax({
         type: 'get',
         url: '/api/comments/comments/?target_is_null=true',
         dataType: 'json',
         success: function (response) {
+            console.log('success')
             fill_table(response)
         },
         error: function(xhr, status, error) {
             console.log(xhr);
         }
     });
-    const quill = new Quill('#text_editor', {
-    theme: 'snow',
-    modules: {
-      toolbar: [
-        ['bold', 'italic', 'underline', 'strike'],
-        ['code', 'code-block', 'link'],
-      ]
-    }
-});
 }
 
 function show_comment_answers(target, next_page_url=undefined) {
@@ -269,7 +300,7 @@ function create_comment_template(data, comment_type) {
             <a name="edit_comment" role="button" class="card-link text-decoration-none" data-target-id="${data.uuid}">
                 ${feather.icons['edit'].toSvg({class: 'icon-size-20'})}
             </a>
-            <a name="remove_comment" role="button" class="card-link text-decoration-none" data-target-id="${data.uuid}">
+            <a name="remove" role="button" href="api/comments/comments/${data.uuid}/" class="card-link text-decoration-none" data-target-id="${data.uuid}">
                 ${feather.icons['trash-2'].toSvg({class: 'icon-size-20'})}
             </a>
         `
@@ -376,8 +407,7 @@ function set_validity_form(xhr, form) {
 
 function fill_table(response) {
     var tbody = $('#comment_table').find('tbody')
-
-    if (response && response.count != 0) {
+    if (response) {
         tbody.empty();
         for (let data of response.results) {
             add_table_row(data, tbody);
