@@ -1,5 +1,17 @@
 $(document).ready(function() {
     start();
+    $(document).on('click', 'a[name="edit"]', function(e) {
+        var link = $(this);
+        var comment = $(`#comment_detail_${link.attr('data-target-id')}`)
+        var form = $('#editor_form');
+        reset_validity_form(form);
+        form.attr('method', 'patch');
+        form.attr('action', link.attr('href'));
+        form.find('h1').text('Edit');
+        form.find('#text_editor div[contenteditable="true"]').html(comment.find('div.card-text').first().html());
+        form.find('button[type="submit"]').text('Save');
+    });
+
     $(document).on('click', 'a[name="remove"]', function(e) {
         e.preventDefault();
 
@@ -8,12 +20,9 @@ $(document).ready(function() {
         $.ajax({
             type: 'delete',
             url: link.attr('href'),
-            headers: {
-                'X-CSRFToken': Cookies.get('csrftoken'),
-            },
+            headers: {'X-CSRFToken': Cookies.get('csrftoken')},
             success: function (response) {
                 if ($(`#comment_table tbody tr[id="${link.attr('data-target-id')}"]`).length == 1) {
-                    console.log($(`#comment_table tbody tr[id="${link.attr('data-target-id')}"]`))
                     $('#return').click();
                     start();
                 } else {
@@ -32,6 +41,8 @@ $(document).ready(function() {
     $(document).on('click', 'a[name="answer"]', function(e) {
         var link = $(this)
         var form = $('#editor_form');
+        clear_editor_form();
+        reset_validity_form(form);
         form.attr('method', 'post');
         form.attr('action', 'api/comments/comments/');
         form.find('h1').text('Create New Answer');
@@ -41,6 +52,8 @@ $(document).ready(function() {
 
     $('#nav_create_comment').click(function (e) {
         var form = $('#editor_form');
+        clear_editor_form();
+        reset_validity_form(form);
         form.attr('method', 'post');
         form.attr('action', 'api/comments/comments/');
         form.find('h1').text('Create New Comment');
@@ -48,36 +61,59 @@ $(document).ready(function() {
     });
 
     $('#editor_form button[type="reset"]').click(function (e) {
-        $('#editor_form #text_editor div[contenteditable="true"]').html('<p><br></p>');
+        clear_editor_form();
     });
 
     $('#editor_form').submit(function (e) {
         e.preventDefault();
 
         var form = $(this);
+        reset_validity_form(form);
         var target_id = form.find('#target_field').val();
         var show_answers_link = $(`#comment_detail_${target_id} a[name="show_answers"]`)
         var answer_block = $(`#answer_block_${target_id}`)
         var submit_button = form.find('button[type="submit"]');
-        console.log(answer_block.children().length > 25);
-        console.log(answer_block.children().not(':last').length);
-        console.log(answer_block.children().not(':last').last().remove());
 
-        reset_validity_form(form);
+
         var text_field_value = form.find('#text_editor div[contenteditable="true"]').html();
         if (text_field_value != '<p><br></p>') {
-            form.find('#text_field').attr('value', text_field_value);
+            form.find('#text_field').val(text_field_value);
         }
 
-        var form_data = form.serialize();
+        var form_data = new FormData(form[0])
+        for (let pair of form_data.entries()) {
+            if (pair[1] instanceof File && pair[1].size === 0) {
+                form_data.delete(pair[0]);
+            }
+        }
 
         $.ajax({
             type: form.attr('method'),
             url: form.attr('action'),
             data: form_data,
+            processData: false,
+            contentType: false,
+            headers: {'X-CSRFToken': Cookies.get('csrftoken')},
             success: function (response) {
                 form.find('[type="reset"]').click();
 
+                if (submit_button.text().includes('Save')) {
+                    var commend_id = form.attr('action').split('/')[3]
+                    if ($(`#${commend_id}`)) {
+                        $('#table_paginator a.active').click();
+                    }
+                    var comment = $(`#comment_detail_${commend_id}`);
+                    var media =  comment.find(`#media_${commend_id}`)
+                    comment.find('div.card-text').first().html(response.text);
+                    media.empty();
+                    if (response.image) {
+                        media.prepend(get_image_link_template(response));
+                        lightbox.init();
+                    }
+                    if (response.file) {
+                        media.append(get_file_link_template(response))
+                    }
+                }
 
                 if (show_answers_link.attr('aria-expanded') === 'false') {
                     answer_block.addClass('show');
@@ -224,15 +260,21 @@ $(document).ready(function() {
     });
 });
 
+function clear_editor_form(form) {
+    var form = $('#editor_form');
+    form.find('#text_editor div[contenteditable="true"]').html('<p><br></p>');
+    form.find('#text_field').val('');
+    form.find('#image_field').val('');
+    form.find('#file_field').val('');
+}
+
 function start() {
-    console.log('start');
     $.ajax({
         type: 'get',
         url: '/api/comments/comments/?target_is_null=true',
         dataType: 'json',
         success: function (response) {
-            console.log('success')
-            fill_table(response)
+            fill_table(response);
         },
         error: function(xhr, status, error) {
             console.log(xhr);
@@ -297,7 +339,7 @@ function create_comment_template(data, comment_type) {
     var owner_links = '';
     if ($('#nav_user_menu').text().includes(data.user.email)) {
         owner_links = `
-            <a name="edit_comment" role="button" class="card-link text-decoration-none" data-target-id="${data.uuid}">
+            <a name="edit" role="button" href="api/comments/comments/${data.uuid}/" class="card-link text-decoration-none" data-target-id="${data.uuid}" data-bs-toggle="modal" data-bs-target="#editor_modal">
                 ${feather.icons['edit'].toSvg({class: 'icon-size-20'})}
             </a>
             <a name="remove" role="button" href="api/comments/comments/${data.uuid}/" class="card-link text-decoration-none" data-target-id="${data.uuid}">
@@ -308,20 +350,12 @@ function create_comment_template(data, comment_type) {
 
     var image_link = '';
     if (data.image) {
-        image_link = `
-            <a id="image" href="${data.image}" data-lightbox="${data.uuid}" class="me-2">
-                <img src="${data.image}" class='img-thumbnail' style="width: 60px;">
-            </a>
-        `
+        image_link = get_image_link_template(data);
     }
 
     var file_link = '';
     if (data.file) {
-        file_link = `
-            <a id="file" href="${data.file}" download>
-                ${feather.icons['file-text'].toSvg({style: "width: 40px; height: 40px;"})}
-            </a>
-        `
+        file_link = get_file_link_template(data);
     }
 
     var show_class = '';
@@ -350,10 +384,8 @@ function create_comment_template(data, comment_type) {
                     </h6>
                 </div>
                 <div class="card-body">
-                    <p class="card-text">
-                        ${data.text}
-                    </p>
-                    <div id="media" class="d-flex flex-row">
+                    <div class="card-text">${data.text}</div>
+                    <div id="media_${data.uuid}" class="d-flex flex-row">
                         ${image_link}
                         ${file_link}
                     </div>
@@ -367,6 +399,22 @@ function create_comment_template(data, comment_type) {
         </div>
     `
     return template
+}
+
+function get_image_link_template(data) {
+    return `
+            <a id="image" href="${data.image}" data-lightbox="${data.uuid}" class="me-2">
+                <img src="${data.image}" class='img-thumbnail' style="width: 60px;">
+            </a>
+        `
+}
+
+function get_file_link_template(data) {
+    return `
+            <a id="file" href="${data.file}" download>
+                ${feather.icons['file-text'].toSvg({style: "width: 40px; height: 40px;"})}
+            </a>
+        `
 }
 
 function add_comment_to_element(element, data, comment_type, prepend=false) {

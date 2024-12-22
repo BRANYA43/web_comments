@@ -16,6 +16,75 @@ from tests.selenium.tools import (
 
 
 @pytest.mark.django_db(transaction=True)
+class TestAnswerAndCommentUpdate:
+    @pytest.fixture()
+    def test_main_comment_with_answer(self, comment_factory, rick):
+        main_comment = comment_factory(user=rick)
+        answer = comment_factory(user=rick, target=main_comment)
+        return main_comment, answer
+
+    def test_user_updates_his_comment_and_answer(
+        self, selenium, wait_driver, live_server, test_main_comment_with_answer, rick
+    ):
+        test_main_comment, test_answers = test_main_comment_with_answer
+        new_comment_text = 'New Comment Text 1234'
+        new_answer_text = 'New Answer Text 1234'
+        # user enters to the site
+        selenium.get(live_server.url)
+        selenium.fullscreen_window()
+
+        # user logs in
+        login_user(wait_driver, rick.email, rick.raw_password)
+        wait_driver.until(ec.text_to_be_present_in_element((By.ID, 'nav_user_menu'), rick.email))
+
+        # user clicks on read link of main comment
+        read_link = wait_driver.until(ec.element_to_be_clickable((By.CSS_SELECTOR, '#comment_table a[name="read"]')))
+        wait_to_click(read_link)
+
+        # user clicks on edit link of main comment
+        main_comment = wait_driver.until(
+            ec.visibility_of_element_located((By.CSS_SELECTOR, 'div[data-comment-type="main_comment"]'))
+        )
+        main_comment_text = main_comment.find_element(By.CSS_SELECTOR, 'div.card-text').text
+        assert new_comment_text not in main_comment_text
+        edit_link = main_comment.find_element(By.CSS_SELECTOR, 'a[name="edit"]')
+        wait_to_click(edit_link)
+
+        # user opens editor modal form and fill it
+        send_comment(wait_driver, new_comment_text)
+
+        # wait update model instance
+        wait_to_get_model_instance(Comment, text__contains=new_comment_text)
+
+        # user sees updated comment
+        main_comment = wait_driver.until(
+            ec.visibility_of_element_located((By.CSS_SELECTOR, 'div[data-comment-type="main_comment"]'))
+        )
+        main_comment_text = main_comment.find_element(By.CSS_SELECTOR, 'div.card-text').text
+        assert new_comment_text in main_comment_text
+
+        # user clicks on edit link of main comment
+        answer = main_comment.find_element(By.CSS_SELECTOR, 'div[data-comment-type="answer"')
+        answer_text = answer.find_element(By.CSS_SELECTOR, 'div.card-text').text
+        assert new_answer_text not in answer_text
+        edit_link = answer.find_element(By.CSS_SELECTOR, 'a[name="edit"]')
+        wait_to_click(edit_link)
+
+        # user opens editor modal form and fill it
+        send_comment(wait_driver, new_answer_text)
+
+        # wait update model instance
+        wait_to_get_model_instance(Comment, text__contains=new_answer_text)
+
+        # user sees updated answer
+        answer = wait_driver.until(
+            ec.visibility_of_element_located((By.CSS_SELECTOR, 'div[data-comment-type="answer"]'))
+        )
+        answer_text = answer.find_element(By.CSS_SELECTOR, 'div.card-text').text
+        assert new_answer_text in answer_text
+
+
+@pytest.mark.django_db(transaction=True)
 class TestAnswerAndCommentDelete:
     @pytest.fixture()
     def test_main_comment_with_answers(self, comment_factory, rick):
