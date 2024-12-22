@@ -229,6 +229,18 @@ function create_show_comments_yet_link(target, next_page_url) {
 }
 
 function create_comment_template(data, comment_type) {
+    var owner_links = '';
+    if ($('#nav_user_menu').text().includes(data.user.email)) {
+        owner_links = `
+            <a name="edit_comment" role="button" class="card-link text-decoration-none" data-target-id="${data.uuid}">
+                ${feather.icons['edit'].toSvg({class: 'icon-size-20'})}
+            </a>
+            <a name="remove_comment" role="button" class="card-link text-decoration-none" data-target-id="${data.uuid}">
+                ${feather.icons['trash-2'].toSvg({class: 'icon-size-20'})}
+            </a>
+        `
+    }
+
     var image_link = '';
     if (data.image) {
         image_link = `
@@ -247,16 +259,17 @@ function create_comment_template(data, comment_type) {
         `
     }
 
-    var comment_footer = '';
-    var add_collapse_class = ''
+    var not_owner_links = '';
+    var add_collapse_class = '';
     if (comment_type.includes('answer')) {
         add_collapse_class = 'collapse'
-        comment_footer = `
-            <div class="card-footer">
-                <a name="show_answers" role="button" class="card-link text-decoration-none" data-bs-toggle="collapse" href="#answer_block_${data.uuid}" data-target-id="${data.uuid}" data-collapse-open="false">
-                    ${feather.icons['message-square'].toSvg({class: 'icon-size-20'})}
-                </a>
-            </div>
+        not_owner_links = `
+            <a name="answer" role="button" class="card-link text-decoration-none" data-target-id="${data.uuid}">
+                Answer
+            </a>
+            <a name="show_answers" role="button" class="card-link text-decoration-none" data-bs-toggle="collapse" href="#answer_block_${data.uuid}" data-target-id="${data.uuid}" data-collapse-open="false">
+                ${feather.icons['message-square'].toSvg({class: 'icon-size-20'})}
+            </a>
         `
     }
 
@@ -279,7 +292,10 @@ function create_comment_template(data, comment_type) {
                         ${file_link}
                     </div>
                 </div>
-                ${comment_footer}
+                <div class="card-footer">
+                    ${not_owner_links}
+                    ${owner_links}
+                </div>
             </div>
           <div id="answer_block_${data.uuid}" class='ps-5 ${add_collapse_class}'></div>
         </div>
