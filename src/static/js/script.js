@@ -1,131 +1,3 @@
-function on_return_button() {
-    $('#main_comment_block').empty();
-    show_table();
-}
-
-function create_return_button() {
-    $('#main_comment_block').append(`
-        <button id='return' type="button" class="btn btn-primary mb-3" onclick="on_return_button()">Return</button>
-    `);
-
-}
-
-function create_show_comments_yet_link(target, next_page_url) {
-    target.find(`#answer_block_${target.attr('data-comment-id')}`).append(`
-        <div class="d-flex justify-content-center">
-            <a id="show_comments_yet_${target.attr('data-comment-id')}" class="link-secondary" data-target-id="#${target.attr('id')}" href="${next_page_url}">Show Yet Comments</a>
-        </div>
-    `)
-}
-
-function hide_table() {
-    $('#table_block').hide();
-}
-
-function show_table() {
-    $('#table_block').show();
-}
-
-function create_comment_template(data, comment_type) {
-    var image_link = '';
-    if (data.image) {
-        image_link = `
-            <a id="image" href="${data.image}" data-lightbox="${data.uuid}" class="me-2">
-                <img src="${data.image}" class='img-thumbnail' style="width: 60px;">
-            </a>
-        `
-    }
-
-    var file_link = '';
-    if (data.file) {
-        file_link = `
-            <a id="file" href="${data.file}" download>
-                ${feather.icons['file-text'].toSvg({style: "width: 40px; height: 40px;"})}
-            </a>
-        `
-    }
-
-    var comment_footer = '';
-    var add_collapse_class = ''
-    if (comment_type.includes('answer')) {
-        add_collapse_class = 'collapse'
-        comment_footer = `
-            <div class="card-footer">
-                <a name="show_answers" role="button" class="card-link text-decoration-none" data-bs-toggle="collapse" href="#answer_block_${data.uuid}" data-target-id="${data.uuid}" data-collapse-open="false">
-                    ${feather.icons['message-square'].toSvg({class: 'icon-size-20'})}
-                </a>
-            </div>
-        `
-    }
-
-    let template = `
-        <div id="comment_detail_${data.uuid}" data-comment-id="${data.uuid}" data-comment-type=${comment_type}>
-            <div class="card mb-3">
-                <div class="card-header d-flex justify-content-between">
-                    <h6 class="text-primary-emphasis">${data.user.username} | ${data.user.email}</h6>
-                    <h6 class="text-primary-emphasis">
-                        Updated: ${format_date(data.updated)} ${format_time(data.updated)} |
-                        Created: ${format_date(data.created)} ${format_time(data.created)}
-                    </h6>
-                </div>
-                <div class="card-body">
-                    <p class="card-text">
-                        ${data.text}
-                    </p>
-                    <div id="media" class="d-flex flex-row">
-                        ${image_link}
-                        ${file_link}
-                    </div>
-                </div>
-                ${comment_footer}
-            </div>
-          <div id="answer_block_${data.uuid}" class='ps-5 ${add_collapse_class}'></div>
-        </div>
-    `
-    return template
-}
-
-
-
-function add_comment_to_element(element, data, comment_type) {
-    let comment = create_comment_template(data, comment_type);
-    element.append(comment);
-}
-
-function show_comment_answers(target, next_page_url=undefined) {
-    let url
-    if (next_page_url) {
-        url = next_page_url
-    } else {
-        url = `api/comments/comments/?target=${target.attr('data-comment-id')}`
-    }
-
-    var answer_block = target.find(`#answer_block_${target.attr('data-comment-id')}`)
-
-    $.ajax({
-        type: 'get',
-        url: url,
-        dataType: 'json',
-        success: function (response) {
-            if (response.results) {
-                for (answer_data of response.results) {
-                    add_comment_to_element(answer_block, answer_data, comment_type='answer');
-                }
-                if (response.next) {
-                    create_show_comments_yet_link(target, response.next);
-                }
-            }
-        }
-    })
-}
-
-function show_comment_detail(data) {
-    add_comment_to_element($('#main_comment_block'), data, 'main_comment');
-    main_comment = $('#main_comment_block [data-comment-type="main_comment"]');
-    show_comment_answers(main_comment);
-};
-
-
 $(document).ready(function() {
     start()
     $('#nav_create_comment').click(function (e) {
@@ -303,6 +175,122 @@ function start() {
 });
 }
 
+function show_comment_answers(target, next_page_url=undefined) {
+    let url
+    if (next_page_url) {
+        url = next_page_url
+    } else {
+        url = `api/comments/comments/?target=${target.attr('data-comment-id')}`
+    }
+
+    var answer_block = target.find(`#answer_block_${target.attr('data-comment-id')}`)
+
+    $.ajax({
+        type: 'get',
+        url: url,
+        dataType: 'json',
+        success: function (response) {
+            if (response.results) {
+                for (answer_data of response.results) {
+                    add_comment_to_element(answer_block, answer_data, comment_type='answer');
+                }
+                if (response.next) {
+                    create_show_comments_yet_link(target, response.next);
+                }
+            }
+        }
+    })
+}
+
+function show_comment_detail(data) {
+    add_comment_to_element($('#main_comment_block'), data, 'main_comment');
+    main_comment = $('#main_comment_block [data-comment-type="main_comment"]');
+    show_comment_answers(main_comment);
+};
+
+function create_return_button() {
+    $('#main_comment_block').append(`
+        <button id='return' type="button" class="btn btn-primary mb-3" onclick="on_return_button()">Return</button>
+    `);
+
+}
+
+function on_return_button() {
+    $('#main_comment_block').empty();
+    show_table();
+}
+
+function create_show_comments_yet_link(target, next_page_url) {
+    target.find(`#answer_block_${target.attr('data-comment-id')}`).append(`
+        <div class="d-flex justify-content-center">
+            <a id="show_comments_yet_${target.attr('data-comment-id')}" class="link-secondary" data-target-id="#${target.attr('id')}" href="${next_page_url}">Show Yet Comments</a>
+        </div>
+    `)
+}
+
+function create_comment_template(data, comment_type) {
+    var image_link = '';
+    if (data.image) {
+        image_link = `
+            <a id="image" href="${data.image}" data-lightbox="${data.uuid}" class="me-2">
+                <img src="${data.image}" class='img-thumbnail' style="width: 60px;">
+            </a>
+        `
+    }
+
+    var file_link = '';
+    if (data.file) {
+        file_link = `
+            <a id="file" href="${data.file}" download>
+                ${feather.icons['file-text'].toSvg({style: "width: 40px; height: 40px;"})}
+            </a>
+        `
+    }
+
+    var comment_footer = '';
+    var add_collapse_class = ''
+    if (comment_type.includes('answer')) {
+        add_collapse_class = 'collapse'
+        comment_footer = `
+            <div class="card-footer">
+                <a name="show_answers" role="button" class="card-link text-decoration-none" data-bs-toggle="collapse" href="#answer_block_${data.uuid}" data-target-id="${data.uuid}" data-collapse-open="false">
+                    ${feather.icons['message-square'].toSvg({class: 'icon-size-20'})}
+                </a>
+            </div>
+        `
+    }
+
+    let template = `
+        <div id="comment_detail_${data.uuid}" data-comment-id="${data.uuid}" data-comment-type=${comment_type}>
+            <div class="card mb-3">
+                <div class="card-header d-flex justify-content-between">
+                    <h6 class="text-primary-emphasis">${data.user.username} | ${data.user.email}</h6>
+                    <h6 class="text-primary-emphasis">
+                        Updated: ${format_date(data.updated)} ${format_time(data.updated)} |
+                        Created: ${format_date(data.created)} ${format_time(data.created)}
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">
+                        ${data.text}
+                    </p>
+                    <div id="media" class="d-flex flex-row">
+                        ${image_link}
+                        ${file_link}
+                    </div>
+                </div>
+                ${comment_footer}
+            </div>
+          <div id="answer_block_${data.uuid}" class='ps-5 ${add_collapse_class}'></div>
+        </div>
+    `
+    return template
+}
+
+function add_comment_to_element(element, data, comment_type) {
+    let comment = create_comment_template(data, comment_type);
+    element.append(comment);
+}
 
 function reset_validity_form(form) {
     form.find('input').each(function() {
@@ -330,6 +318,23 @@ function set_validity_form(xhr, form) {
     }
 }
 
+function fill_table(response) {
+    var tbody = $('#comment_table').find('tbody')
+
+    if (response && response.count != 0) {
+        tbody.empty();
+        for (let data of response.results) {
+            add_table_row(data, tbody);
+        }
+        if (response.count > response.results.length) {
+            $('#paginator_block').removeClass('d-none');
+            set_paginate_pages(response);
+        }
+    } else {
+        $('#empty_row').removeClass('d-none');
+    }
+}
+
 function add_table_row(data, tbody) {
     tbody.append(`
         <tr id="${data.uuid}" class="align-middle" style="height: 90px;">
@@ -347,39 +352,6 @@ function add_table_row(data, tbody) {
         </td>
         </tr>
     `);
-}
-
-function format_date(iso_datetime) {
-    let datetime = new Date(iso_datetime);
-    let day = String(datetime.getDate()).padStart(2, '0');
-    let month = String(datetime.getMonth()).padStart(2, '0');
-    let year = datetime.getFullYear();
-    return `${day}.${month}.${year}`
-}
-
-function format_time(iso_datetime) {
-    let datetime = new Date(iso_datetime);
-    let hours = String(datetime.getHours()).padStart(2, '0');
-    let minutes = String(datetime.getMinutes()).padStart(2, '0');
-    let seconds = String(datetime.getSeconds()).padStart(2, '0');
-    return `[${hours}:${minutes}:${seconds}]`;
-}
-
-function fill_table(response) {
-    var tbody = $('#comment_table').find('tbody')
-
-    if (response && response.count != 0) {
-        tbody.empty();
-        for (let data of response.results) {
-            add_table_row(data, tbody);
-        }
-        if (response.count > response.results.length) {
-            $('#paginator_block').removeClass('d-none');
-            set_paginate_pages(response);
-        }
-    } else {
-        $('#empty_row').removeClass('d-none');
-    }
 }
 
 function set_paginate_pages(response) {
@@ -419,4 +391,28 @@ function set_paginate_pages(response) {
             <li class="page-item"><a id="page_${i}" class="page-link ${extra_classes}" href="/api/comments/comments/?page=${i}&target_is_null=true">${i}</a></li>
         `)
     }
+}
+
+function hide_table() {
+    $('#table_block').hide();
+}
+
+function show_table() {
+    $('#table_block').show();
+}
+
+function format_date(iso_datetime) {
+    let datetime = new Date(iso_datetime);
+    let day = String(datetime.getDate()).padStart(2, '0');
+    let month = String(datetime.getMonth()).padStart(2, '0');
+    let year = datetime.getFullYear();
+    return `${day}.${month}.${year}`
+}
+
+function format_time(iso_datetime) {
+    let datetime = new Date(iso_datetime);
+    let hours = String(datetime.getHours()).padStart(2, '0');
+    let minutes = String(datetime.getMinutes()).padStart(2, '0');
+    let seconds = String(datetime.getSeconds()).padStart(2, '0');
+    return `[${hours}:${minutes}:${seconds}]`;
 }
