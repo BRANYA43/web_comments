@@ -15,6 +15,7 @@ from comments.serializers import (
     CommentCreateSerializer,
     CommentUpdateSerializer,
 )
+from comments.services import resize_image
 
 
 class CommentViewSet(ModelViewSet):
@@ -42,3 +43,15 @@ class CommentViewSet(ModelViewSet):
         if not (permission_classes := self.permission_classes.get(self.action)):
             permission_classes = self.permission_classes['default']
         return [permission() for permission in permission_classes]
+
+    def create(self, request, *args, **kwargs):
+        self._resize_image(request)
+        return super().create(request, *args, **kwargs)
+
+    def update(self, request, *args, **kwargs):
+        self._resize_image(request)
+        return super().update(request, *args, **kwargs)
+
+    def _resize_image(self, request):
+        if image := request.data.get('image'):
+            request.data['image'] = resize_image(image)
