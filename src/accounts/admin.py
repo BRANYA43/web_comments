@@ -1,6 +1,8 @@
 from django.contrib import admin  # NOQA
 from django.contrib.auth import get_user_model
 
+from comments.admin import CommentInline
+
 GeneralUser = get_user_model()
 
 
@@ -14,3 +16,4 @@ class UserAdmin(admin.ModelAdmin):
     )
     readonly_fields = ('last_login', 'joined')
     filter_horizontal = ('user_permissions', 'groups')
+    inlines = (CommentInline,)
