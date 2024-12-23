@@ -52,7 +52,11 @@ class AppEnvs(BaseSettings):
     @field_validator('allowed_hosts', mode='before')
     def get_allowed_hosts_as_list(cls, v: str | list[str]) -> list[str]:
         if isinstance(v, str):
-            return v.split(' ')
+            v = v.split(' ')
+        if 'localhost' not in v:
+            v.append('localhost')
+        if '0.0.0.0' not in v:
+            v.append('0.0.0.0')
         return v
 
 
