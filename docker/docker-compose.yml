@@ -1,0 +1,71 @@
+services:
+  api:
+    build:
+      context: ../.
+      dockerfile: docker/django/Dockerfile
+    container_name: api
+    volumes:
+      - static_volume:/opt/src/static
+      - media_volume:/opt/src/media
+    command: >
+      bash -c "
+      python manage.py makemigrations;
+      python manage.py migrate;
+      python manage.py createsuperuser --noinput;
+      python manage.py collectstatic --noinput;
+      daphne core.asgi:application --bind 0.0.0.0 --port 8000
+      "
+    env_file:
+      - ../environments/.env
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD', '/usr/local/bin/healthcheck.sh']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: always
+
+  db:
+    build: ./postgres
+    container_name: db
+    volumes:
+      - db_volumes:/var/lib/postgresql/data
+    env_file:
+      - ../environments/.env
+    healthcheck:
+      test: ['CMD', '/usr/local/bin/healthcheck.sh']
+      interval: 30s
+      timeout: 2s
+      retries: 5
+    restart: always
+
+  nginx:
+    build: ./nginx
+    container_name: nginx
+    volumes:
+      - static_volume:/opt/src/static
+      - media_volume:/opt/src/media
+    env_file:
+      - ../environments/.env
+    ports:
+      - "80:80"
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD', '/usr/local/bin/healthcheck.sh']
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    restart: always
+
+
+volumes:
+  db_volumes:
+    name: db_data
+  media_volume:
+    name: api_media
+  static_volume:
+    name: api_static
