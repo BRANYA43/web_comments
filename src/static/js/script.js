@@ -16,6 +16,44 @@ function start_socket () {
 $(document).ready(function() {
     start();
     start_socket();
+    $('tr a[id$=_col]').click(function (e) {
+        e.preventDefault();
+
+        var active_page = $('[id^=page].active');
+        var link = $(this);
+        var link_id = link.attr('id');
+        var link_sort = link.attr('data-sort')
+        var url = `${active_page.attr('href')}&ordering=`
+        console.log(url)
+        if (link_id.includes('email')) {
+            url += `${link_sort}email`
+        } else if (link_id.includes('username')) {
+            url += `${link_sort}username`
+        } else if (link_id.includes('updated')) {
+            url += `${link_sort}updated`
+        } else if (link_id.includes('created')) {
+            url += `${link_sort}created`
+        }
+        console.log(url)
+
+
+        $.ajax({
+            type: 'get',
+            url: url,
+            success: function (response) {
+                console.log(response);
+                fill_table(response);
+            }
+        })
+
+        if (link_sort == '-') {
+            link.attr('data-sort', '');
+        } else {
+            link.attr('data-sort', '-');
+        }
+
+    });
+
     $(document).on('click', 'a[name="edit"]', function(e) {
         var link = $(this);
         var comment = $(`#comment_detail_${link.attr('data-target-id')}`)
@@ -478,6 +516,7 @@ function fill_table(response) {
         }
         if (response.count > response.results.length) {
             $('#paginator_block').removeClass('d-none');
+            console.log('set_paginator', response)
             set_paginate_pages(response);
         }
     } else {
@@ -510,7 +549,7 @@ function set_paginate_pages(response) {
     for (let link_name of ['first', 'previous', 'next', 'last']) {
             var link = $(`#${link_name}_page`)
             var url = response[link_name]
-            if (url == null || new RegExp(`\\?page=${current_page}(?:&|$)`).test(url)) {
+            if (url == null || new RegExp(`page=${current_page}(?:&|$)`).test(url)) {
                 link.addClass('disabled');
                 link.attr('href', '#');
             } else {
@@ -537,8 +576,10 @@ function set_paginate_pages(response) {
         if (i == response.current_page) {
             extra_classes = 'active'
         }
+        regex = /page=1(?=&|$)/;
+        var href = response.first.replace(regex, `page=${i}`)
         next_li.before(`
-            <li class="page-item"><a id="page_${i}" class="page-link ${extra_classes}" href="/api/comments/comments/?page=${i}&target_is_null=true">${i}</a></li>
+            <li class="page-item"><a id="page_${i}" class="page-link ${extra_classes}" href="${href}">${i}</a></li>
         `)
     }
 }
