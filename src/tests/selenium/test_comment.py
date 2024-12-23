@@ -31,7 +31,6 @@ class TestAnswerAndCommentUpdate:
         new_answer_text = 'New Answer Text 1234'
         # user enters to the site
         selenium.get(live_server.url)
-        selenium.fullscreen_window()
 
         # user logs in
         login_user(wait_driver, rick.email, rick.raw_password)
