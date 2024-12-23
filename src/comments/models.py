@@ -1,13 +1,11 @@
 from uuid import uuid4
 
-from django.contrib.auth import get_user_model
+from django.conf import settings
 from django.core.validators import MaxLengthValidator, FileExtensionValidator
 from django.db import models  # NOQA
 
 from comments.services import FileUploader
 from comments.validators import FileSizeValidator, ImageSizeValidator, HTMLTagValidator
-
-GeneralUser = get_user_model()
 
 
 class Comment(models.Model):
@@ -18,7 +16,7 @@ class Comment(models.Model):
         editable=False,
     )
     user = models.ForeignKey(
-        to=GeneralUser,
+        to=settings.AUTH_USER_MODEL,
         on_delete=models.PROTECT,
     )
     target = models.ForeignKey(

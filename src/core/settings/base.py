@@ -25,8 +25,8 @@ INSTALLED_APPS = [
     'django_filters',
     'channels',
     'djangochannelsrestframework',
-    'comments',
     'accounts',
+    'comments',
     'django_cleanup.apps.CleanupConfig',  # must be after all apps that have models
 ]
 
