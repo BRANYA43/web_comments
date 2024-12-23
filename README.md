@@ -26,11 +26,11 @@ Topics are displayed in a table, and comments on each topic are shown in a casca
 - Read topics and comments without register account
 
 # How to run with docker
+- Go to the folder with the downloaded project.
 - Copy by renaming `environments/template.env` > `environments/.env.`
 - Create a secret key using the command `openssl rand -base64 64` and add it to `DJANGO_SECRET_KEY`.
 - Add the allowed hosts/domains (e.g., 'domain1 domain2') to `DJANGO_ALLOWED_HOSTS`.
 - If necessary, modify other environment variables.
-- Go to the folder with the downloaded project.
 - Run the command `docker compose -f ./docker/docker-compose.yml up -d`.
 
 
