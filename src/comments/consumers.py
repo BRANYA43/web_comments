@@ -16,5 +16,4 @@ class CommentConsumer(AsyncAPIConsumer):
 
     @model_observer(Comment)
     async def comment_creation_observer(self, message, action, message_type, observer=None, **kwargs):
-        if action == 'create':
-            await self.send_json({'uuid': str(message['pk'])})
+        await self.send_json({'uuid': str(message['pk'])})
