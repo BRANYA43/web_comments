@@ -1,5 +1,21 @@
+function start_socket () {
+    socket = new WebSocket('ws://localhost:8000/api/ws/comments/');
+    socket.onmessage = function(e) {
+        start();
+    };
+
+    socket.onopen = function(e) {
+        console.log("WebSocket is open now.");
+    };
+
+    socket.onclose = function(e) {
+        console.log("WebSocket is closed now.");
+    };
+}
+
 $(document).ready(function() {
     start();
+    start_socket();
     $(document).on('click', 'a[name="edit"]', function(e) {
         var link = $(this);
         var comment = $(`#comment_detail_${link.attr('data-target-id')}`)
