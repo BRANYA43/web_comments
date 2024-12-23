@@ -1,5 +1,5 @@
 function start_socket () {
-    socket = new WebSocket('ws://localhost:8000/api/ws/comments/');
+    socket = new WebSocket('/api/ws/comments/');
     socket.onmessage = function(e) {
         start();
     };
