@@ -5,7 +5,7 @@ from django.core.validators import MaxLengthValidator, FileExtensionValidator
 from django.db import models  # NOQA
 
 from comments.services import FileUploader
-from comments.validators import FileSizeValidator, ImageSizeValidator
+from comments.validators import FileSizeValidator, ImageSizeValidator, HTMLTagValidator
 
 GeneralUser = get_user_model()
 
@@ -29,7 +29,10 @@ class Comment(models.Model):
         related_name='answers',
     )
     text = models.TextField(
-        validators=[MaxLengthValidator(2048)],
+        validators=[
+            MaxLengthValidator(2048),
+            HTMLTagValidator(['p', 'strong', 'em', 'u', 's', 'code', 'a'], ['br']),
+        ],
     )
     image = models.ImageField(
         upload_to=FileUploader('comments/images/%Y/%m/%d/'),
