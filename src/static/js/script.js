@@ -254,7 +254,7 @@ $(document).ready(function() {
         modules: {
           toolbar: [
             ['bold', 'italic', 'underline', 'strike'],
-            ['code', 'code-block', 'link'],
+            ['code', 'link'],
           ]
         }
     });
