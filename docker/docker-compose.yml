@@ -5,7 +5,7 @@ services:
       dockerfile: docker/django/Dockerfile
     container_name: api
     volumes:
-      - static_volume:/opt/src/static
+      - static_volume:/opt/src/collected_static
       - media_volume:/opt/src/media
     command: >
       bash -c "
@@ -45,7 +45,7 @@ services:
     build: ./nginx
     container_name: nginx
     volumes:
-      - static_volume:/opt/src/static
+      - static_volume:/opt/src/collected_static
       - media_volume:/opt/src/media
     env_file:
       - ../environments/.env
