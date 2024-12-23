@@ -23,6 +23,7 @@ pydantic = {extras = ["email"], version = "^2.10.3"}
 drf-spectacular = "^0.28.0"
 drf-standardized-errors = {extras = ["openapi"], version = "^0.14.1"}
 django-filter = "^24.3"
+djangochannelsrestframework = "^1.2.0"
 
 
 [tool.poetry.group.dev.dependencies]
