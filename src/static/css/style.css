@@ -1,0 +1,28 @@
+.text-truncate-multiline {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.icon-size-20 {
+    width: 20px;
+    height: 20px;
+}
+
+.focus-outline-none:focus {
+    box-shadow: none;
+}
+
+#text_editor.ql-container.ql-snow {
+    border: none !important;
+}
+
+.ql-toolbar.ql-snow {
+    border: none !important;
+}
+
+#text_editor.ql-container.ql-snow > .ql-editor {
+    min-height: 200px;
+}

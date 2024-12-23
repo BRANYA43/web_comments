@@ -1,0 +1,20 @@
+<ul id="account_nav_links" class="navbar-nav mb-2 mb-lg-0">
+  <li class="nav-item">
+    <button id="nav_create_comment" class="nav-link" data-bs-toggle="modal" data-bs-target="#editor_modal">
+      Create
+    </button>
+  </li>
+
+  <li class="nav-item dropdown">
+    <button id="nav_user_menu" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+      {{ user.email }}
+    </button>
+    <ul class="dropdown-menu">
+      <li>
+        <a id="nav_logout" class="dropdown-item" href="{% url 'user-logout' %}">
+          Sign Out
+        </a>
+      </li>
+    </ul>
+  </li>
+</ul>

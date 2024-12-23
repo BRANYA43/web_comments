@@ -1,0 +1,17 @@
+<nav id="navbar" class="navbar navbar-expand-lg bg-body-tertiary">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="#">Web</a>
+    <div class="collapse navbar-collapse d-flex justify-content-between" id="navbarSupportedContent">
+      <div></div>
+      {% if user.is_authenticated %}
+        {% include 'components/navbar/account_nav_links.html' %}
+      {% else %}
+        {% include 'components/navbar/auth_nav_links.html' %}
+      {% endif %}
+    </div>
+  </div>
+</nav>
+
+{% include 'components/modals/login.html' %}
+{% include 'components/modals/register.html' %}
+{% include 'components/modals/editor_form.html' %}

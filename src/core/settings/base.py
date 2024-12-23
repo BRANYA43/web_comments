@@ -22,9 +22,11 @@ INSTALLED_APPS = [
     'rest_framework',
     'drf_spectacular',
     'drf_standardized_errors',
+    'django_filters',
     'channels',
-    'comments',
+    'djangochannelsrestframework',
     'accounts',
+    'comments',
     'django_cleanup.apps.CleanupConfig',  # must be after all apps that have models
 ]
 
@@ -74,3 +76,5 @@ USE_TZ = True
 
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+AUTH_USER_MODEL = 'accounts.User'

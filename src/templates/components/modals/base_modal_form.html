@@ -1,0 +1,33 @@
+<div class="modal fade" id="{% block modal_id %}id{% endblock modal_id %}_modal" tabindex="-1">
+  <div class="modal-dialog {% block extra_modal_classes %}{% endblock extra_modal_classes %}">
+    <div class="modal-content">
+      <form
+          id="{% block form_id %}id{% endblock form_id %}_form"
+          class="needs-validation"
+          action="{% block form_action %}#{% endblock form_action %}"
+          method="{% block form_method %}post{% endblock form_method %}"
+          novalidate>
+        {% csrf_token %}
+
+        <div class="modal-header">
+          <h1 class="modal-title fs-5">{% block modal_title %}MODAL TITLE{% endblock modal_title %}</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+
+        <div class="modal-body">
+          <div id="form_errors" class="alert alert-danger d-none"></div>
+          {% block form_fields %}FIELDS{% endblock form_fields %}
+        </div>
+
+        <div class="modal-footer">
+          <button type="reset" class="btn btn-secondary" data-bs-dismiss="modal">
+            {% block close_name %}Close{% endblock close_name %}
+          </button>
+          <button type="submit" class="btn btn-primary">
+            {% block submit_name %}Submit{% endblock submit_name %}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

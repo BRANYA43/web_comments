@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block header_content %}
+  {% include 'components/navbar/navbar.html' %}
+{% endblock header_content %}
+{% block main_content %}
+  <div id="table_block">
+    {% include 'components/table.html' %}
+    <div id="paginator_block" class="d-flex justify-content-center d-none">
+      {% include 'components/paginator.html' %}
+    </div>
+  </div>
+  <div id="main_comment_block"></div>
+{% endblock main_content %}
