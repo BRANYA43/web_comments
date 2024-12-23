@@ -3,7 +3,30 @@ from unittest.mock import MagicMock
 import pytest
 from django.core.exceptions import ValidationError
 
-from comments.validators import FileSizeValidator, ImageSizeValidator
+from comments.validators import FileSizeValidator, ImageSizeValidator, HTMLTagValidator
+
+
+class TestHTMLTagValidator:
+    validator = HTMLTagValidator(['div', 'a', 'p', 'strong'], ['br'])
+
+    valid_html = """
+    <div class="div-class"><p>Hello <strong>World</strong><br><a href="#">Cool Link</a></p></div>
+    """
+    html_has_forbidden_tags = f"""
+    {valid_html}<script src="hack_script.js">alert(HACK!!!);</script>
+    """
+
+    def test_validator_doesnt_raise_error_for_valid_html(self):
+        self.validator(self.valid_html)  # not raise
+
+    def test_validator_raises_error_for_html_has_forbidden_tags(self):
+        with pytest.raises(ValidationError, match='Text has forbidden tags.'):
+            self.validator(self.html_has_forbidden_tags)
+
+    @pytest.mark.parametrize('html', ['<a>', '</a>'])
+    def test_validator_raises_error_for_html_has_not_closed_tag(self, html):
+        with pytest.raises(ValidationError, match='Text has not closed tags.'):
+            self.validator(html)
 
 
 class TestImageSizeValidator:
